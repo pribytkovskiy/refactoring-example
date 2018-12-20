@@ -11,12 +11,12 @@ RSpec.describe Account do
     withdraw_amount: 'Input the amount of money you want to withdraw'
   }.freeze
 
-  HELLO_PHRASES = [
-    'Hello, we are RubyG bank!',
-    '- If you want to create account - press `create`',
-    '- If you want to load account - press `load`',
-    '- If you want to exit - press `exit`'
-  ].freeze
+  HELLO_PHRASES = <<~HELLO_MESSAGE.freeze
+    Hello, we are RubyG bank!
+    - If you want to create account - press `create`
+    - If you want to load account - press `load`
+    - If you want to exit - press `exit`
+  HELLO_MESSAGE
 
   ASK_PHRASES = {
     name: 'Enter your name',
