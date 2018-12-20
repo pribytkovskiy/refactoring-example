@@ -1,28 +1,41 @@
 require 'yaml'
 require 'pry'
+require 'i18n'
+require './config.rb'
 
 class Account
   attr_accessor :login, :name, :card, :password, :file_path
 
+  HELLO_MESSAGE = <<~HELLO_MESSAGE.freeze
+    Hello, we are RubyG bank!
+    - If you want to create account - press `create`
+    - If you want to load account - press `load`
+    - If you want to exit - press `exit`
+  HELLO_MESSAGE
+
+  CREATE_CARD_PHRASES = <<~CREATE_CARD_PHRASES.freeze
+    You could create one of 3 card types',
+    - Usual card. 2% tax on card INCOME. 20$ tax on SENDING money from this card. 5% tax on WITHDRAWING money. For creation this card - press `usual`
+    - Capitalist card. 10$ tax on card INCOME. 10% tax on SENDING money from this card. 4$ tax on WITHDRAWING money. For creation this card - press `capitalist`
+    - Virtual card. 1$ tax on card INCOME. 1$ tax on SENDING money from this card. 12% tax on WITHDRAWING money. For creation this card - press `virtual`
+    - For exit - press `exit`
+  CREATE_CARD_PHRASES
+
+  COMMANDS = { create: 'create', load: 'load' }.freeze
+  FILE_PATH = 'accounts.yml'
+
   def initialize
     @errors = []
-    @file_path = 'accounts.yml'
   end
 
   def console
-      puts 'Hello, we are RubyG bank!'
-      puts '- If you want to create account - press `create`'
-      puts '- If you want to load account - press `load`'
-      puts '- If you want to exit - press `exit`'
+    puts HELLO_MESSAGE
 
     # FIRST SCENARIO. IMPROVEMENT NEEDED
 
-    a = gets.chomp
-
-    if a == 'create'
-      create
-    elsif a == 'load'
-      load
+    case gets.chomp
+    when COMMANDS[:create] then create
+    when COMMANDS[:load] then load
     else
       exit
     end
@@ -34,7 +47,7 @@ class Account
       age_input
       login_input
       password_input
-      break unless @errors.length != 0
+      break if @errors.length == 0
       @errors.each do |e|
         puts e
       end
@@ -44,19 +57,17 @@ class Account
     @card = []
     new_accounts = accounts << self
     @current_account = self
-    File.open(@file_path, 'w') { |f| f.write new_accounts.to_yaml } #Storing
+    File.open(FILE_PATH, 'w') { |f| f.write new_accounts.to_yaml } #Storing
     main_menu
   end
 
   def load
     loop do
-      if !accounts.any?
-        return create_the_first_account
-      end
+      return create_the_first_account unless accounts.any?
 
-      puts 'Enter your login'
+      puts I18n.t(:enter_login)
       login = gets.chomp
-      puts 'Enter your password'
+      puts I18n.t(:enter_password)
       password = gets.chomp
 
       if accounts.map { |a| { login: a.login, password: a.password } }.include?({ login: login, password: password })
@@ -64,7 +75,7 @@ class Account
         @current_account = a
         break
       else
-        puts 'There is no account with given credentials'
+        puts I18n.t(:no_account)
         next
       end
     end
@@ -72,7 +83,7 @@ class Account
   end
 
   def create_the_first_account
-    puts 'There is no active accounts, do you want to be the first?[y/n]'
+    puts I18n.t(:no_active_accounts)
     if gets.chomp == 'y'
       return create
     else
@@ -116,7 +127,7 @@ class Account
           break
         end
       else
-        puts "Wrong command. Try again!\n"
+        puts I18n.t(:wrong_command)
       end
     end
   end
@@ -160,7 +171,7 @@ class Account
             new_accounts.push(ac)
           end
         end
-        File.open(@file_path, 'w') { |f| f.write new_accounts.to_yaml } #Storing
+        File.open(FILE_PATH, 'w') { |f| f.write new_accounts.to_yaml } #Storing
         break
       else
         puts "Wrong card type. Try again!\n"
@@ -192,7 +203,7 @@ class Account
                 new_accounts.push(ac)
               end
             end
-            File.open(@file_path, 'w') { |f| f.write new_accounts.to_yaml } #Storing
+            File.open(FILE_PATH, 'w') { |f| f.write new_accounts.to_yaml } #Storing
             break
           else
             return
@@ -246,7 +257,7 @@ class Account
                     new_accounts.push(ac)
                   end
                 end
-                File.open(@file_path, 'w') { |f| f.write new_accounts.to_yaml } #Storing
+                File.open(FILE_PATH, 'w') { |f| f.write new_accounts.to_yaml } #Storing
                 puts "Money #{a2&.to_i.to_i} withdrawed from #{current_card[:number]}$. Money left: #{current_card[:balance]}$. Tax: #{withdraw_tax(current_card[:type], current_card[:balance], current_card[:number], a2&.to_i.to_i)}$"
                 return
               else
@@ -300,7 +311,7 @@ class Account
                     new_accounts.push(ac)
                   end
                 end
-                File.open(@file_path, 'w') { |f| f.write new_accounts.to_yaml } #Storing
+                File.open(FILE_PATH, 'w') { |f| f.write new_accounts.to_yaml } #Storing
                 puts "Money #{a2&.to_i.to_i} was put on #{current_card[:number]}. Balance: #{current_card[:balance]}. Tax: #{put_tax(current_card[:type], current_card[:balance], current_card[:number], a2&.to_i.to_i)}"
                 return
               end
@@ -408,7 +419,7 @@ class Account
           new_accounts.push(ac)
         end
       end
-      File.open(@file_path, 'w') { |f| f.write new_accounts.to_yaml } #Storing
+      File.open(FILE_PATH, 'w') { |f| f.write new_accounts.to_yaml } #Storing
     end
   end
 

@@ -11,7 +11,7 @@ RSpec.describe Account do
     withdraw_amount: 'Input the amount of money you want to withdraw'
   }.freeze
 
-  HELLO_PHRASES = <<~HELLO_MESSAGE.freeze
+  HELLO_MESSAGE = <<~HELLO_MESSAGE.freeze
     Hello, we are RubyG bank!
     - If you want to create account - press `create`
     - If you want to load account - press `load`
@@ -122,7 +122,7 @@ RSpec.describe Account do
       it do
         allow(current_subject).to receive_message_chain(:gets, :chomp) { 'test' }
         allow(current_subject).to receive(:exit)
-        HELLO_PHRASES.each { |phrase| expect(current_subject).to receive(:puts).with(phrase) }
+        expect(current_subject).to receive(:puts).with(HELLO_MESSAGE)
         current_subject.console
       end
     end
@@ -156,7 +156,7 @@ RSpec.describe Account do
       end
 
       it 'write to file Account instance' do
-        current_subject.instance_variable_set(:@file_path, OVERRIDABLE_FILENAME)
+        stub_const("Account::FILE_PATH", OVERRIDABLE_FILENAME)
         current_subject.create
         expect(File.exist?(OVERRIDABLE_FILENAME)).to be true
         accounts = YAML.load_file(OVERRIDABLE_FILENAME)
@@ -414,7 +414,7 @@ RSpec.describe Account do
       it 'deletes account if user inputs is y' do
         expect(current_subject).to receive_message_chain(:gets, :chomp) { success_input }
         expect(current_subject).to receive(:accounts) { accounts }
-        current_subject.instance_variable_set(:@file_path, OVERRIDABLE_FILENAME)
+        stub_const("Account::FILE_PATH", OVERRIDABLE_FILENAME)
         current_subject.instance_variable_set(:@current_account, instance_double('Account', login: correct_login))
 
         current_subject.destroy_account
@@ -469,7 +469,7 @@ RSpec.describe Account do
       before do
         allow(current_subject).to receive(:card).and_return([])
         allow(current_subject).to receive(:accounts) { [current_subject] }
-        current_subject.instance_variable_set(:@file_path, OVERRIDABLE_FILENAME)
+        stub_const("Account::FILE_PATH", OVERRIDABLE_FILENAME)
         current_subject.instance_variable_set(:@current_account, current_subject)
       end
 
@@ -564,7 +564,7 @@ RSpec.describe Account do
         let(:deletable_card_number) { 1 }
 
         before do
-          current_subject.instance_variable_set(:@file_path, OVERRIDABLE_FILENAME)
+          stub_const("Account::FILE_PATH", OVERRIDABLE_FILENAME)
           current_subject.instance_variable_set(:@card, fake_cards)
           allow(current_subject).to receive(:accounts) { [current_subject] }
           current_subject.instance_variable_set(:@current_account, current_subject)
@@ -709,7 +709,7 @@ RSpec.describe Account do
                 allow(current_subject).to receive_message_chain(:gets, :chomp).and_return(*commands)
                 allow(current_subject).to receive(:accounts) { [current_subject] }
                 current_subject.instance_variable_set(:@card, [custom_card, card_one, card_two])
-                current_subject.instance_variable_set(:@file_path, OVERRIDABLE_FILENAME)
+                stub_const("Account::FILE_PATH", OVERRIDABLE_FILENAME)
                 new_balance = default_balance + correct_money_amount_greater_than_tax - custom_card[:tax]
 
                 expect { current_subject.put_money }.to output(
