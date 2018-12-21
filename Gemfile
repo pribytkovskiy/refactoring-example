@@ -19,5 +19,4 @@ group :test do
   gem 'simplecov'
   gem 'simplecov-lcov'
   gem 'undercover'
-  gem 'rugged', ">=0.26.0"
 end
