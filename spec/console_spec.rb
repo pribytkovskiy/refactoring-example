@@ -1,4 +1,6 @@
-RSpec.describe Account do
+require './auto_load.rb'
+
+RSpec.describe Console do
   OVERRIDABLE_FILENAME = 'spec/fixtures/account.yml'.freeze
 
   COMMON_PHRASES = {
@@ -156,7 +158,7 @@ RSpec.describe Account do
       end
 
       it 'write to file Account instance' do
-        stub_const("Account::FILE_PATH", OVERRIDABLE_FILENAME)
+        stub_const("Console::FILE_PATH", OVERRIDABLE_FILENAME)
         current_subject.create
         expect(File.exist?(OVERRIDABLE_FILENAME)).to be true
         accounts = YAML.load_file(OVERRIDABLE_FILENAME)
@@ -214,7 +216,7 @@ RSpec.describe Account do
           let(:error) { ACCOUNT_VALIDATION_PHRASES[:login][:exists] }
 
           before do
-            allow(current_subject).to receive(:accounts) { [instance_double('Account', login: error_input)] }
+            allow(current_subject).to receive(:accounts) { [instance_double('Console', login: error_input)] }
           end
 
           it { expect { current_subject.create }.to output(/#{error}/).to_stdout }
@@ -280,7 +282,7 @@ RSpec.describe Account do
 
       before do
         allow(current_subject).to receive_message_chain(:gets, :chomp).and_return(*all_inputs)
-        allow(current_subject).to receive(:accounts) { [instance_double('Account', login: login, password: password)] }
+        allow(current_subject).to receive(:accounts) { [instance_double('Console', login: login, password: password)] }
       end
 
       context 'with correct outout' do
@@ -358,7 +360,7 @@ RSpec.describe Account do
         allow(current_subject).to receive(:show_cards)
         allow(current_subject).to receive(:exit)
         allow(current_subject).to receive_message_chain(:gets, :chomp).and_return('SC', 'exit')
-        current_subject.instance_variable_set(:@current_account, instance_double('Account', name: name))
+        current_subject.instance_variable_set(:@current_account, instance_double('Console', name: name))
         expect { current_subject.main_menu }.to output(/Welcome, #{name}/).to_stdout
         MAIN_OPERATIONS_TEXTS.each do |text|
           allow(current_subject).to receive_message_chain(:gets, :chomp).and_return('SC', 'exit')
@@ -371,7 +373,7 @@ RSpec.describe Account do
       let(:undefined_command) { 'undefined' }
 
       it 'calls specific methods on predefined commands' do
-        current_subject.instance_variable_set(:@current_account, instance_double('Account', name: name))
+        current_subject.instance_variable_set(:@current_account, instance_double('Console', name: name))
         allow(current_subject).to receive(:exit)
 
         commands.each do |command, method_name|
@@ -382,7 +384,7 @@ RSpec.describe Account do
       end
 
       it 'outputs incorrect message on undefined command' do
-        current_subject.instance_variable_set(:@current_account, instance_double('Account', name: name))
+        current_subject.instance_variable_set(:@current_account, instance_double('Console', name: name))
         expect(current_subject).to receive(:exit)
         allow(current_subject).to receive_message_chain(:gets, :chomp).and_return(undefined_command, 'exit')
         expect { current_subject.main_menu }.to output(/#{ERROR_PHRASES[:wrong_command]}/).to_stdout
@@ -396,9 +398,9 @@ RSpec.describe Account do
     let(:correct_login) { 'test' }
     let(:fake_login) { 'test1' }
     let(:fake_login2) { 'test2' }
-    let(:correct_account) { instance_double('Account', login: correct_login) }
-    let(:fake_account) { instance_double('Account', login: fake_login) }
-    let(:fake_account2) { instance_double('Account', login: fake_login2) }
+    let(:correct_account) { instance_double('Console', login: correct_login) }
+    let(:fake_account) { instance_double('Console', login: fake_login) }
+    let(:fake_account2) { instance_double('Console', login: fake_login2) }
     let(:accounts) { [correct_account, fake_account, fake_account2] }
 
     after do
@@ -414,8 +416,8 @@ RSpec.describe Account do
       it 'deletes account if user inputs is y' do
         expect(current_subject).to receive_message_chain(:gets, :chomp) { success_input }
         expect(current_subject).to receive(:accounts) { accounts }
-        stub_const("Account::FILE_PATH", OVERRIDABLE_FILENAME)
-        current_subject.instance_variable_set(:@current_account, instance_double('Account', login: correct_login))
+        stub_const("Console::FILE_PATH", OVERRIDABLE_FILENAME)
+        current_subject.instance_variable_set(:@current_account, instance_double('Console', login: correct_login))
 
         current_subject.destroy_account
 
@@ -439,13 +441,13 @@ RSpec.describe Account do
     let(:cards) { [{ number: 1234, type: 'a' }, { number: 5678, type: 'b' }] }
 
     it 'display cards if there are any' do
-      current_subject.instance_variable_set(:@current_account, instance_double('Account', card: cards))
+      current_subject.instance_variable_set(:@current_account, instance_double('Console', card: cards))
       cards.each { |card| expect(current_subject).to receive(:puts).with("- #{card[:number]}, #{card[:type]}") }
       current_subject.show_cards
     end
 
     it 'outputs error if there are no active cards' do
-      current_subject.instance_variable_set(:@current_account, instance_double('Account', card: []))
+      current_subject.instance_variable_set(:@current_account, instance_double('Console', card: []))
       expect(current_subject).to receive(:puts).with(ERROR_PHRASES[:no_active_cards])
       current_subject.show_cards
     end
@@ -469,7 +471,7 @@ RSpec.describe Account do
       before do
         allow(current_subject).to receive(:card).and_return([])
         allow(current_subject).to receive(:accounts) { [current_subject] }
-        stub_const("Account::FILE_PATH", OVERRIDABLE_FILENAME)
+        stub_const("Console::FILE_PATH", OVERRIDABLE_FILENAME)
         current_subject.instance_variable_set(:@current_account, current_subject)
       end
 
@@ -508,7 +510,7 @@ RSpec.describe Account do
   describe '#destroy_card' do
     context 'without cards' do
       it 'shows message about not active cards' do
-        current_subject.instance_variable_set(:@current_account, instance_double('Account', card: []))
+        current_subject.instance_variable_set(:@current_account, instance_double('Console', card: []))
         expect { current_subject.destroy_card }.to output(/#{ERROR_PHRASES[:no_active_cards]}/).to_stdout
       end
     end
@@ -564,7 +566,7 @@ RSpec.describe Account do
         let(:deletable_card_number) { 1 }
 
         before do
-          stub_const("Account::FILE_PATH", OVERRIDABLE_FILENAME)
+          stub_const("Console::FILE_PATH", OVERRIDABLE_FILENAME)
           current_subject.instance_variable_set(:@card, fake_cards)
           allow(current_subject).to receive(:accounts) { [current_subject] }
           current_subject.instance_variable_set(:@current_account, current_subject)
@@ -598,7 +600,7 @@ RSpec.describe Account do
   describe '#put_money' do
     context 'without cards' do
       it 'shows message about not active cards' do
-        current_subject.instance_variable_set(:@current_account, instance_double('Account', card: []))
+        current_subject.instance_variable_set(:@current_account, instance_double('Console', card: []))
         expect { current_subject.put_money }.to output(/#{ERROR_PHRASES[:no_active_cards]}/).to_stdout
       end
     end
@@ -709,7 +711,7 @@ RSpec.describe Account do
                 allow(current_subject).to receive_message_chain(:gets, :chomp).and_return(*commands)
                 allow(current_subject).to receive(:accounts) { [current_subject] }
                 current_subject.instance_variable_set(:@card, [custom_card, card_one, card_two])
-                stub_const("Account::FILE_PATH", OVERRIDABLE_FILENAME)
+                stub_const("Console::FILE_PATH", OVERRIDABLE_FILENAME)
                 new_balance = default_balance + correct_money_amount_greater_than_tax - custom_card[:tax]
 
                 expect { current_subject.put_money }.to output(
@@ -730,7 +732,7 @@ RSpec.describe Account do
   describe '#withdraw_money' do
     context 'without cards' do
       it 'shows message about not active cards' do
-        current_subject.instance_variable_set(:@current_account, instance_double('Account', card: []))
+        current_subject.instance_variable_set(:@current_account, instance_double('Console', card: []))
         expect { current_subject.withdraw_money }.to output(/#{ERROR_PHRASES[:no_active_cards]}/).to_stdout
       end
     end

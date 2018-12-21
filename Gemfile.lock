@@ -85,7 +85,6 @@ DEPENDENCIES
   rspec (~> 3.8)
   rubocop
   rubocop-rspec
-  rugged (>= 0.26.0)
   simplecov
   simplecov-lcov
   undercover
