@@ -19,4 +19,5 @@ group :test do
   gem 'simplecov'
   gem 'simplecov-lcov'
   gem 'undercover'
+  gem 'rugged', git: 'https://github.com/redbadger/rugged', branch: 'backends', submodules: true # need circleci
 end
