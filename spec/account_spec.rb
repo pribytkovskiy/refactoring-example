@@ -27,13 +27,13 @@ RSpec.describe Account do
 
   # rubocop:disable Metrics/LineLength
 
-  CREATE_CARD_PHRASES = [
-    'You could create one of 3 card types',
-    '- Usual card. 2% tax on card INCOME. 20$ tax on SENDING money from this card. 5% tax on WITHDRAWING money. For creation this card - press `usual`',
-    '- Capitalist card. 10$ tax on card INCOME. 10% tax on SENDING money from this card. 4$ tax on WITHDRAWING money. For creation this card - press `capitalist`',
-    '- Virtual card. 1$ tax on card INCOME. 1$ tax on SENDING money from this card. 12% tax on WITHDRAWING money. For creation this card - press `virtual`',
-    '- For exit - press `exit`'
-  ].freeze
+  CREATE_CARD_PHRASES = <<~CREATE_CARD_PHRASES.freeze
+    You could create one of 3 card types
+    - Usual card. 2% tax on card INCOME. 20$ tax on SENDING money from this card. 5% tax on WITHDRAWING money. For creation this card - press `usual`
+    - Capitalist card. 10$ tax on card INCOME. 10% tax on SENDING money from this card. 4$ tax on WITHDRAWING money. For creation this card - press `capitalist`
+    - Virtual card. 1$ tax on card INCOME. 1$ tax on SENDING money from this card. 12% tax on WITHDRAWING money. For creation this card - press `virtual`
+    - For exit - press `exit`
+  CREATE_CARD_PHRASES
 
   # rubocop:enable Metrics/LineLength
 
@@ -454,7 +454,7 @@ RSpec.describe Account do
   describe '#create_card' do
     context 'with correct outout' do
       it do
-        CREATE_CARD_PHRASES.each { |phrase| expect(current_subject).to receive(:puts).with(phrase) }
+        expect(current_subject).to receive(:puts).with(CREATE_CARD_PHRASES)
         current_subject.instance_variable_set(:@card, [])
         current_subject.instance_variable_set(:@current_account, current_subject)
         allow(current_subject).to receive(:accounts).and_return([])

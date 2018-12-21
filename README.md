@@ -1,3 +1,5 @@
+[![CircleCI](https://circleci.com/gh/pribytkovskiy/refactoring-example/tree/develop.svg?style=svg)](https://circleci.com/gh/pribytkovskiy/refactoring-example/tree/develop)
+
 # Refactor Me
 
 ## What is it?
