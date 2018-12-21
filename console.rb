@@ -64,10 +64,8 @@ class Console
       @errors = []
     end
 
-    @card = []
-    new_accounts = accounts << self
-    @current_account = self
-    File.open(FILE_PATH, 'w') { |f| f.write new_accounts.to_yaml } #Storing
+    @current_account = Account.new(self)
+
     main_menu
   end
 
