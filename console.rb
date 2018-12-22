@@ -1,5 +1,6 @@
 class Console
   attr_accessor :login, :name, :card, :password, :file_path
+  attr_reader :age, :login, :name, :password
 
   HELLO_MESSAGE = <<~HELLO_MESSAGE.freeze
     Hello, we are RubyG bank!
@@ -63,10 +64,13 @@ class Console
       @errors.map { |e| puts e }
       @errors = []
     end
-
-    @current_account = Account.new(self)
-
+    create_account
     main_menu
+  end
+
+  def create_account
+    @current_account = Account.new(self)
+    @current_account.save
   end
 
   def load
@@ -379,7 +383,6 @@ class Console
     when @login.length < 4 then @errors.push('Login must be longer then 4 symbols')
     when @login.length > 20 then @errors.push('Login must be shorter then 20 symbols')
     end
-
     @errors.push('Such account is already exists') if (accounts.map { |a| a.login }.include? @login)
   end
 

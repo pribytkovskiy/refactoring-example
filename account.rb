@@ -1,17 +1,17 @@
 class Account
-  FILE_PATH = 'accounts.yml'
+  attr_reader :age, :login, :name, :password
+  FILE_PATH = './accounts.yml'
 
   def initialize(console)
     @age = console.age
-    @card = console.card ||= []
+    @card = []
     @login = console.login
     @name = console.name
     @password = console.password
   end 
 
-  def create(account)
-    new_accounts = accounts << account
-    @current_account = account
+  def save
+    new_accounts = accounts << self
     File.open(FILE_PATH, 'w') { |f| f.write new_accounts.to_yaml } #Storing
   end
 
