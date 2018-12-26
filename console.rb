@@ -42,6 +42,7 @@ class Console
 
   def initialize
     @errors = []
+    @account = Account.new
   end
 
   def console
@@ -69,8 +70,7 @@ class Console
   end
 
   def create_account
-    @current_account = Account.new(self)
-    @current_account.save
+    @current_account = @account.create(self)
   end
 
   def load
@@ -82,9 +82,8 @@ class Console
       puts I18n.t(:enter_password)
       password = gets.chomp
 
-      if accounts.map { |a| { login: a.login, password: a.password } }.include?({ login: login, password: password })
-        a = accounts.select { |a| login == a.login }.first
-        @current_account = a
+      if @account.load(login, password).nil?
+        @current_account = @account.load(login, password)
         break
       else
         puts I18n.t(:no_account)
@@ -357,9 +356,7 @@ class Console
     puts I18n.t(:destroy_account)
     a = gets.chomp
     if a == 'y'
-      new_accounts = []
-      accounts.each { |ac| new_accounts.push(ac) unless ac.login == @current_account.login }
-      File.open(FILE_PATH, 'w') { |f| f.write new_accounts.to_yaml } #Storing
+      @account.destroy(@current_account)
     end
   end
 
