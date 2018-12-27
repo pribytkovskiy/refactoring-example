@@ -1,18 +1,17 @@
-class Account
+class Account < Validators::Account
   attr_reader :age, :login, :name, :password
   FILE_PATH = './accounts.yml'
 
-  def initialize
-
-  end 
-
-  def create(console)
-    @age = console.age
-    @card = []
-    @login = console.login
-    @name = console.name
-    @password = console.password
-    save
+  def create(account)
+    validate(account)
+    if valid?
+      @age = account.age
+      @card = []
+      @login = account.login
+      @name = account.name
+      @password = account.password
+      save
+    end
   end
 
   def load(login, password)

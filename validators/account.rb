@@ -2,17 +2,22 @@ module Validators
   class Account
     attr_reader :errors
 
+    START_LENGTH_NAME = 4
+    END_LENGTH_NAME = 20
+    START_LENGTH_PASSWORD = 6
+    END_LENGTH_PASSWORD = 30
+    START_LENGTH_AGE = 23
+    END_LENGTH_AGE = 89
+
     def initialize
       @errors = []
     end
 
     def validate(account)
-      initialize_account(account)
-
-      validate_name
-      validate_age
-      validate_login
-      validate_password
+      validate_name(account.name)
+      validate_age(account.age)
+      validate_login(account.login)
+      validate_password(account.password)
     end
 
     def valid?
@@ -26,35 +31,29 @@ module Validators
 
     private
 
-    def initialize_account(account)
-      @account = account
-      @name = @account.name
-      @age = @account.age
-      @login = @account.login
-      @password = @account.password
+    def validate_name(name)
+      @errors.push(I18n.t(:error_name)) if (name == '' || name[0].upcase != name[0])
     end
 
-    def validate_name
-      if @name.empty? || @name[0].upcase != @name[0]
-        @errors.push('Your name must not be empty and starts with first upcase letter')
-      end
+    def validate_login(login)
+      @errors.push(I18n.t(:error_login_present)) if login.empty?
+      @errors.push(I18n.t(:error_login_longer)) if login.length < START_LENGTH_NAME
+      @errors.push(I18n.t(:error_login_shorter)) if login.length > END_LENGTH_NAME
+      @errors.push(I18n.t(:error_login_exists)) if accounts.map(&:login).include?(login)
     end
 
-    def validate_login
-      @errors.push('Login must present') if @login.empty?
-      @errors.push('Login must be longer then 4 symbols') if @login.length < 4
-      @errors.push('Login must be shorter then 20 symbols') if @login.length > 20
-      @errors.push('Such account is already exists') if @account.accounts.map(&:login).include?(@login)
+    def validate_password(password)
+      @errors.push(I18n.t(:error_password_present)) if password.empty?
+      @errors.push(I18n.t(:error_password_longer)) if password.length < START_LENGTH_PASSWORD
+      @errors.push(I18n.t(:error_password_shorter)) if password.length > START_LENGTH_PASSWORD
     end
 
-    def validate_password
-      @errors.push('Password must present') if @password.empty?
-      @errors.push('Password must be longer then 6 symbols') if @password.length < 6
-      @errors.push('Password must be shorter then 30 symbols') if @password.length > 30
+    def validate_age(age)
+      @errors.push(I18n.t(:error_name)) unless age.between?(START_LENGTH_AGE, END_LENGTH_AGE)
     end
 
-    def validate_age
-      @errors.push('Your Age must be greeter then 23 and lower then 90') unless @age.between?(23, 89)
+    def accounts
+      File.exists?(FILE_PATH) ? YAML.load_file(FILE_PATH) : []
     end
   end
 end

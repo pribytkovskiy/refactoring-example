@@ -18,8 +18,6 @@ RSpec.describe Account do
 
     end
 
-
-
     it 'write to file Account instance' do
       current_subject.create(current_subject)
       expect(File.exist?(OVERRIDABLE_FILENAME)).to be true

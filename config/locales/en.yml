@@ -28,3 +28,13 @@ en:
   recipient_card: 'Enter the recipient card:'
   correct_number_card: Please, input correct number of card
   enough_money_sender_card: There is no enough money on sender card
+  error_name: Your name must not be empty and starts with first upcase letter
+  error_login_present: Login must present
+  error_login_longer: Login must be longer then 4 symbols
+  error_login_shorter: Login must be shorter then 20 symbols
+  error_login_exists: Such account is already exists
+  error_password_present: Password must present
+  error_password_longer: Password must be longer then 6 symbols
+  error_password_shorter: Password must be shorter then 30 symbols
+  error_name: Your Age must be greeter then 23 and lower then 90
+  

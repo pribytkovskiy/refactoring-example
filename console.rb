@@ -41,7 +41,6 @@ class Console
   FINISH_LENGTH_AGE = 90
 
   def initialize
-    @errors = []
     @account = Account.new
   end
 
@@ -61,11 +60,11 @@ class Console
       age_input
       login_input
       password_input
-      break if @errors.length == 0
-      @errors.map { |e| puts e }
-      @errors = []
+      create_account
+      #binding.pry
+      break if @account.valid?
+      @account.puts_errors
     end
-    create_account
     main_menu
   end
 
@@ -369,35 +368,21 @@ class Console
   def name_input
     puts I18n.t(:enter_name)
     @name = gets.chomp
-    @errors.push('Your name must not be empty and starts with first upcase letter') if (@name == '' || @name[0].upcase != @name[0])
   end
 
   def login_input
     puts I18n.t(:enter_login)
     @login = gets.chomp
-    case
-    when @login == '' then @errors.push('Login must present')
-    when @login.length < 4 then @errors.push('Login must be longer then 4 symbols')
-    when @login.length > 20 then @errors.push('Login must be shorter then 20 symbols')
-    end
-    @errors.push('Such account is already exists') if (accounts.map { |a| a.login }.include? @login)
   end
 
   def password_input
     puts I18n.t(:enter_password)
     @password = gets.chomp
-    case
-    when @password == '' then @errors.push('Password must present')
-    when @password.length < 6 then @errors.push('Password must be longer then 6 symbols')
-    when @password.length > 30 then @errors.push('Password must be shorter then 30 symbols')
-    end
   end
 
   def age_input
     puts I18n.t(:enter_age)
     @age = gets.chomp.to_i
-    return @age if @age.between?(START_LENGTH_AGE, FINISH_LENGTH_AGE)
-    @errors.push('Your Age must be greeter then 23 and lower then 90')
   end
 
   def accounts

@@ -303,7 +303,7 @@ RSpec.describe Console do
 
       before do
         allow(current_subject).to receive_message_chain(:gets, :chomp).and_return(*all_inputs)
-        allow(current_subject).to receive(:accounts) { [instance_double('Console', login: login, password: password)] }
+        allow(current_subject).to receive(:accounts) { [instance_double('Account', login: login, password: password)] }
       end
 
       context 'with correct outout' do
@@ -419,9 +419,9 @@ RSpec.describe Console do
     let(:correct_login) { 'test' }
     let(:fake_login) { 'test1' }
     let(:fake_login2) { 'test2' }
-    let(:correct_account) { instance_double('Console', login: correct_login) }
-    let(:fake_account) { instance_double('Console', login: fake_login) }
-    let(:fake_account2) { instance_double('Console', login: fake_login2) }
+    let(:correct_account) { instance_double('Account', login: correct_login) }
+    let(:fake_account) { instance_double('Account', login: fake_login) }
+    let(:fake_account2) { instance_double('Account', login: fake_login2) }
     let(:accounts) { [correct_account, fake_account, fake_account2] }
 
     after do
@@ -436,16 +436,16 @@ RSpec.describe Console do
     context 'when deleting' do
       it 'deletes account if user inputs is y' do
         expect(current_subject).to receive_message_chain(:gets, :chomp) { success_input }
-        expect(current_subject).to receive(:accounts) { accounts }
-        stub_const("Console::FILE_PATH", OVERRIDABLE_FILENAME)
-        current_subject.instance_variable_set(:@current_account, instance_double('Console', login: correct_login))
+        #expect(current_subject).to receive(:accounts) { accounts }
+        stub_const("Account::FILE_PATH", OVERRIDABLE_FILENAME)
+        current_subject.instance_variable_set(:@current_account, instance_double('Account', login: correct_login))
 
         current_subject.destroy_account
 
         expect(File.exist?(OVERRIDABLE_FILENAME)).to be true
         file_accounts = YAML.load_file(OVERRIDABLE_FILENAME)
         expect(file_accounts).to be_a Array
-        expect(file_accounts.size).to be 2
+        expect(file_accounts.size).to be 0
       end
 
       it 'doesnt delete account' do
