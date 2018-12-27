@@ -15,7 +15,7 @@ module CreditCards
       amount * 0.2
     end
 
-    def sender_tax
+    def sender_tax(amount)
       20
     end
   end

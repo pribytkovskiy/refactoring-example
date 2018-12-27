@@ -23,9 +23,9 @@ class Account < Validators::Account
     end
   end
 
-  def destroy(current_account)
+  def destroy
     new_accounts = []
-    accounts.each { |ac| new_accounts.push(ac) unless ac.login == current_account.login }
+    accounts.each { |ac| new_accounts.push(ac) unless ac.login == self.login }
     storing(new_accounts)
   end
 

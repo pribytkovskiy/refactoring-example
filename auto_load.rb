@@ -1,6 +1,7 @@
 require 'yaml'
 require 'pry'
 require 'i18n'
+require './money.rb'
 require './credit_card.rb'
 require './credits_cards/base.rb'
 require './credits_cards/capitalist.rb'

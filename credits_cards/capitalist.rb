@@ -11,7 +11,7 @@ module CreditCards
       amount * 0.04
     end
 
-    def put_tax
+    def put_tax(amount)
       10
     end
 

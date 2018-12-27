@@ -92,7 +92,7 @@ class Console
       when COMMANDS_MENU[:put_money] then put_money
       when COMMANDS_MENU[:withdraw_money] then withdraw_money
       when COMMANDS_MENU[:send_money] then send_money
-      when COMMANDS_MENU[:destroy_account] then destroy_account
+      when COMMANDS_MENU[:destroy_account] then return destroy_account
       when COMMANDS_MENU[:exit]
         exit 
         break
@@ -125,9 +125,10 @@ class Console
   def destroy_card
     loop do
       if @current_account.cards.any?
-        print_cards_delete
-        answer = gets.chomp
-        break if answer == 'exit'
+        puts I18n.t(:want_to_delete)
+        print_cards
+        answer = gets.chomp # one method
+        break if answer == 'exit' 
         return confirmation_delete_card(answer) if answer&.to_i <= @current_account.cards.length && answer&.to_i > 0
         puts I18n.t(:wrong_number) unless answer&.to_i <= @current_account.cards.length && answer&.to_i > 0
       else
@@ -136,8 +137,47 @@ class Console
     end
   end
 
-  def print_cards_delete
-    puts I18n.t(:want_to_delete)
+  def withdraw_money
+    puts I18n.t(:choose_withdrawing)
+
+    if @current_account.cards.any?
+      print_cards
+      loop do
+        answer = gets.chomp # one method
+        break if answer == 'exit'
+        #return confirmation_delete_card(answer) if answer&.to_i <= @current_account.cards.length && answer&.to_i > 0
+        puts I18n.t(:wrong_number) unless answer&.to_i <= @current_account.cards.length && answer&.to_i > 0
+        current_card = @current_account.cards[answer&.to_i - 1]
+
+        loop do
+          puts I18n.t(:amount_money)
+          input_money = gets.chomp
+          if input_money&.to_i > 0
+            money_left = current_card.balance - input_money&.to_i - current_card.withdraw_tax(input_money&.to_i)
+            if money_left > 0
+              @current_account.cards[answer&.to_i - 1].balance = money_left
+
+              @current_account.save_change
+
+              puts "Money #{input_money&.to_i} withdrawed from #{current_card.number}$."
+              puts "Money left: #{current_card.balance}$. Tax: #{current_card.withdraw_tax(input_money&.to_i)}$"
+              return
+            else
+              puts I18n.t(:enough_money)
+              return
+            end
+          else
+            puts I18n.t(:correct_amount)
+            return
+          end
+        end
+      end
+    else
+      puts I18n.t(:no_active_cards)
+    end
+  end
+
+  def print_cards
     @current_account.cards.each_with_index { |c, i| puts "- #{c.number}, #{c.class.name}, press #{i + 1}" }
     puts I18n.t(:press_exit)
   end
@@ -160,19 +200,12 @@ class Console
 
   def destroy_account
     puts I18n.t(:destroy_account)
-    a = gets.chomp
-    if a == 'y'
-      @account.destroy(@current_account)
-    end
+    @current_account.destroy if gets.chomp == 'y'
   end
 
   def create_the_first_account
     puts I18n.t(:no_active_accounts)
     gets.chomp == 'y' ? create : console
-  end
-
-  def random_number
-    16.times.map{rand(10)}.join
   end
 
   def name_input

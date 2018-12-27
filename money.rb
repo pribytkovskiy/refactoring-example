@@ -1,50 +1,6 @@
 class Money
   def withdraw_money
-    puts I18n.t(:choose_withdrawing)
-
-    if @current_account.card.any?
-      @current_account.card.each_with_index do |c, i|
-        puts "- #{c[:number]}, #{c[:type]}, press #{i + 1}"
-      end
-      puts "press `exit` to exit\n"
-      loop do
-        answer = gets.chomp
-        break if answer == 'exit'
-        if answer&.to_i.to_i <= @current_account.card.length && answer&.to_i.to_i > 0
-          current_card = @current_account.card[answer&.to_i.to_i - 1]
-
-          loop do
-            puts I18n.t(:amount_money)
-            a2 = gets.chomp
-            if a2&.to_i.to_i > 0
-              money_left = current_card[:balance] - a2&.to_i.to_i - withdraw_tax(current_card[:type], current_card[:balance], current_card[:number], a2&.to_i.to_i)
-              if money_left > 0
-                current_card[:balance] = money_left
-                @current_account.card[answer&.to_i.to_i - 1] = current_card
-
-                new_accounts = [] # one medhod
-                accounts.each { |ac| ac.login == @current_account.login ? new_accounts.push(@current_account) : new_accounts.push(ac) }
-                
-                File.open(FILE_PATH, 'w') { |f| f.write new_accounts.to_yaml } #Storing
-                puts "Money #{a2&.to_i.to_i} withdrawed from #{current_card[:number]}$. Money left: #{current_card[:balance]}$. Tax: #{withdraw_tax(current_card[:type], current_card[:balance], current_card[:number], a2&.to_i.to_i)}$"
-                return
-              else
-                puts I18n.t(:enough_money)
-                return
-              end
-            else
-              puts I18n.t(:correct_amount)
-              return
-            end
-          end
-        else
-          puts I18n.t(:wrong_number)
-          return
-        end
-      end
-    else
-      puts I18n.t(:no_active_cards)
-    end
+    
   end
 
   def put_money
