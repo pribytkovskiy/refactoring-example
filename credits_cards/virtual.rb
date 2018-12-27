@@ -1,5 +1,5 @@
-module CreditCardTypes
-  class Usual < Base # TODO: refactor to be equal
+module CreditCards
+  class Virtual < Base # TODO: refactor to be equal
     attr_accessor :balance
 
     def initialize
@@ -8,15 +8,15 @@ module CreditCardTypes
     end
 
     def withdraw_tax(amount)
-      amount * 0.05
+      amount * 0.88
     end
 
-    def put_tax(amount)
-      amount * 0.2
+    def put_tax
+      1
     end
 
     def sender_tax
-      20
+      1
     end
   end
 end

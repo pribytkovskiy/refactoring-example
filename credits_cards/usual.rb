@@ -1,4 +1,4 @@
-module CreditCardTypes
+module CreditCards
   class Usual < Base # TODO: refactor to be equal
     attr_accessor :balance
 

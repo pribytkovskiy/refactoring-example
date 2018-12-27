@@ -1,16 +1,19 @@
 class Account < Validators::Account
+  attr_accessor :cards
   attr_reader :age, :login, :name, :password
+
   FILE_PATH = './accounts.yml'
 
   def create(account)
     validate(account)
     if valid?
       @age = account.age
-      @card = []
       @login = account.login
       @name = account.name
       @password = account.password
-      save
+      @cards = []
+      new_accounts = accounts << self
+      storing(new_accounts)
     end
   end
 
@@ -26,18 +29,19 @@ class Account < Validators::Account
     storing(new_accounts)
   end
 
-  private
+  def accounts
+    File.exists?(FILE_PATH) ? YAML.load_file(FILE_PATH) : []
+  end
 
-  def save
-    new_accounts = accounts << self
+  def save_change
+    new_accounts = []
+    accounts.each { |ac| ac.login == self.login ? new_accounts.push(self) : new_accounts.push(ac) }
     storing(new_accounts)
   end
 
+  private
+
   def storing(new_accounts)
     File.open(FILE_PATH, 'w') { |f| f.write new_accounts.to_yaml }
-  end
-
-  def accounts
-    File.exists?(FILE_PATH) ? YAML.load_file(FILE_PATH) : []
   end
 end

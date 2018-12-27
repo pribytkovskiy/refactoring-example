@@ -1,4 +1,4 @@
-module CreditCardTypes
+module CreditCards
   class Capitalist < Base # TODO: refactor to be equal
     attr_accessor :balance
 
@@ -8,15 +8,15 @@ module CreditCardTypes
     end
 
     def withdraw_tax(amount)
-      amount * 0.05
+      amount * 0.04
     end
 
-    def put_tax(amount)
-      amount * 0.2
+    def put_tax
+      10
     end
 
-    def sender_tax
-      20
+    def sender_tax(amount)
+      amount * 0.1
     end
   end
 end
