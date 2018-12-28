@@ -1,51 +1,11 @@
 class Money
-  def withdraw_money
-    
+  def money_left(current_card, money_left)
+    current_card.balance = money_left
+    @current_account.save_change
   end
 
   def put_money
-    puts I18n.t(:choose_card)
-
-    if @current_account.card.any?
-      @current_account.card.each_with_index { |c, i| puts "- #{c[:number]}, #{c[:type]}, press #{i + 1}" }
-      puts I18n.t(:press_exit)
-      loop do
-        answer = gets.chomp
-        break if answer == COMMANDS[:exit]
-        if answer&.to_i.to_i <= @current_account.card.length && answer&.to_i.to_i > 0
-          current_card = @current_account.card[answer&.to_i.to_i - 1]
-          loop do
-            puts I18n.t(:amount_money_card)
-            amount_money = gets.chomp
-            if amount_money&.to_i.to_i > 0
-              if put_tax(current_card[:type], current_card[:balance], current_card[:number], amount_money&.to_i.to_i) >= amount_money&.to_i.to_i
-                puts I18n.t(:tax_higher)
-                return
-              else
-                new_money_amount = current_card[:balance] + amount_money&.to_i.to_i - put_tax(current_card[:type], current_card[:balance], current_card[:number], amount_money&.to_i.to_i)
-                current_card[:balance] = new_money_amount
-                @current_account.card[answer&.to_i.to_i - 1] = current_card
-
-                new_accounts = [] # one medhod
-                accounts.each { |ac| ac.login == @current_account.login ? new_accounts.push(@current_account) : new_accounts.push(ac) }
-
-                File.open(FILE_PATH, 'w') { |f| f.write new_accounts.to_yaml } #Storing
-                puts "Money #{amount_money&.to_i.to_i} was put on #{current_card[:number]}. Balance: #{current_card[:balance]}. Tax: #{put_tax(current_card[:type], current_card[:balance], current_card[:number], amount_money&.to_i.to_i)}"
-                return
-              end
-            else
-              puts I18n.t(:correct_amount_money)
-              return
-            end
-          end
-        else
-          puts I18n.t(:wrong_number)
-          return
-        end
-      end
-    else
-      puts I18n.t(:no_active_cards)
-    end
+    
   end
 
   def send_money
