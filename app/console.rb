@@ -32,7 +32,6 @@ class Console
                     put_money: 'PM', withdraw_money: 'WM', send_money: 'SM', 
                     destroy_account: 'DA', exit: 'exit' }
   COMMANDS = { create: 'create', load: 'load', exit: 'exit', yes: 'y' }.freeze
-  FILE_PATH = 'accounts.yml'
 
   def initialize
     @account = Account.new
@@ -135,16 +134,20 @@ class Console
 
   def withdraw_money
     puts I18n.t(:choose_withdrawing)
-    if @current_account.cards.any?
-      print_cards
-      loop do
-        answer = gets.chomp
-        break if answer == COMMANDS[:exit]
-        return withdraw_money_amount_money(answer) if check_card_ordinal_number(answer)
-        puts I18n.t(:wrong_number) unless check_card_ordinal_number(answer)
-      end
-    else
-      puts I18n.t(:no_active_cards)
+    loop do
+      puts I18n.t(:no_active_cards) unless @current_account.cards.any?
+      break unless @current_account.cards.any?
+      withdraw_money_amount_money(choose_card)
+    end
+  end
+
+  def choose_card
+    print_cards
+    loop do
+      answer = gets.chomp
+      break if answer == COMMANDS[:exit]
+      return answer if check_card_ordinal_number(answer)
+      puts I18n.t(:wrong_number) unless check_card_ordinal_number(answer)
     end
   end
 
@@ -152,39 +155,28 @@ class Console
     current_card = @current_account.cards[answer&.to_i - 1]
     puts I18n.t(:amount_money)
     input_money = gets.chomp
-    withdraw_money_left_money(input_money, current_card) if money_check_plus?(input_money)
-    puts I18n.t(:correct_amount) unless money_check_plus?(input_money)
-  end
-
-  def money_check_plus?(input_money)
-    input_money&.to_i > 0
+    withdraw_money_left_money(input_money, current_card) if input_money&.to_i > 0
+    puts I18n.t(:correct_amount) unless input_money&.to_i > 0
   end
 
   def withdraw_money_left_money(input_money, current_card)
     money_left = current_card.balance - input_money&.to_i - current_card.withdraw_tax(input_money&.to_i)
-    if money_left > 0
+    loop do
+      break puts I18n.t(:enough_money) if money_left <= 0
       current_card.balance = money_left
       @current_account.save_change
-      puts "Money #{input_money&.to_i} withdrawed from #{current_card.number}$."
+      puts "Money #{input_money&.to_i}$ withdrawed from #{current_card.number}."
       puts "Money left: #{current_card.balance}$. Tax: #{current_card.withdraw_tax(input_money&.to_i)}$"
-    else
-      puts I18n.t(:enough_money)
+      return
     end
   end
 
   def put_money
     puts I18n.t(:choose_card)
-
-    if @current_account.cards.any?
-      loop do
-        print_cards
-        answer = gets.chomp
-        break if answer == COMMANDS[:exit]
-        return put_money_amount_money(answer) if answer&.to_i.to_i <= @current_account.cards.length && answer&.to_i.to_i > 0
-        puts I18n.t(:wrong_number) unless answer&.to_i <= @current_account.cards.length && answer&.to_i > 0
-      end
-    else
-      puts I18n.t(:no_active_cards)
+    loop do
+      puts I18n.t(:no_active_cards) unless @current_account.cards.any?
+      break unless @current_account.cards.any?
+      put_money_amount_money(choose_card)
     end
   end
 
@@ -192,44 +184,41 @@ class Console
     current_card = @current_account.cards[answer&.to_i - 1]
     puts I18n.t(:amount_money_card)
     amount_money = gets.chomp
-    put_money_left_money(amount_money, current_card) if money_check_plus?(amount_money)
-    puts I18n.t(:correct_amount_money) unless money_check_plus?(amount_money)
+    put_money_left_money(amount_money, current_card) if amount_money&.to_i > 0
+    puts I18n.t(:correct_amount_money) unless amount_money&.to_i > 0
   end
 
   def put_money_left_money(amount_money, current_card)
-    if current_card.put_tax(amount_money&.to_i) < amount_money&.to_i
+    loop do
+      break puts I18n.t(:tax_higher) if current_card.put_tax(amount_money&.to_i) >= amount_money&.to_i
       current_card.balance = current_card.balance + amount_money&.to_i - current_card.put_tax(amount_money&.to_i)
       @current_account.save_change
-      puts "Money #{amount_money&.to_i} was put on #{current_card.number}. Balance: #{current_card.balance}. Tax: #{current_card.put_tax(amount_money&.to_i)}"
-    else
-      puts I18n.t(:tax_higher)
+      puts "Money #{amount_money&.to_i}$ was put on #{current_card.number}."
+      puts "Balance: #{current_card.balance}$. Tax: #{current_card.put_tax(amount_money&.to_i)}$"
+      return
     end
   end
 
   def send_money
     puts I18n.t(:choose_card_sending)
-    if @current_account.cards.any?
-      print_cards
-      answer = gets.chomp
-      exit if answer == COMMANDS[:exit]
-      sender_card = @current_account.cards[answer&.to_i - 1] if answer&.to_i <= @current_account.cards.length && answer&.to_i > 0
-      puts I18n.t(:choose_correct_card) unless answer&.to_i <= @current_account.cards.length && answer&.to_i > 0
-    else
-      puts I18n.t(:no_active_cards)
+    loop do
+      puts I18n.t(:no_active_cards) unless @current_account.cards.any?
+      break unless @current_account.cards.any?
+      recipient_card(choose_card)
     end
-    recipient_card(sender_card)
   end
 
-  def recipient_card(sender_card)
+  def recipient_card(answer)
+    sender_card = @current_account.cards[answer&.to_i - 1]
     puts I18n.t(:recipient_card)
     enter_recipient_card = gets.chomp
-    if enter_recipient_card.length == 16
+    loop do
+      puts I18n.t(:correct_number_card) if enter_recipient_card.length != Account::CARD_LENGTH
+      break enter_recipient_card.length != Account::CARD_LENGTH
       all_cards = @current_account.accounts.map(&:cards).flatten
       recipient_cards = all_cards.select { |card| card.number == enter_recipient_card }
       recipient_card = recipient_cards.first if recipient_cards.any?
       puts "There is no card with number #{enter_recipient_card}\n" unless recipient_cards.any?
-    else
-      puts I18n.t(:correct_number_card)
     end
     send_check_plus(sender_card, recipient_card)
   end
@@ -259,17 +248,18 @@ class Console
     puts "Money #{amount_money&.to_i}$ was send on #{recipient_card.number}. Balance: #{recipient_balance}. Tax: #{recipient_card.put_tax(amount_money&.to_i)}$\n"
   end
 
+  def check_card_ordinal_number(answer)
+    answer&.to_i <= @current_account.cards.length && answer&.to_i > 0
+  end
+
   def print_cards
     @current_account.cards.each_with_index { |c, i| puts "- #{c.number}, #{c.class.name}, press #{i + 1}" }
     puts I18n.t(:press_exit)
   end
 
   def show_cards
-    if @current_account.cards.any?
-      @current_account.cards.map { |card| puts "- #{card.number}, #{card.class.name}" }
-    else
-      puts I18n.t(:no_active_cards)
-    end
+    @current_account.cards.map { |card| puts "- #{card.number}, #{card.class.name}" } if @current_account.cards.any?
+    puts I18n.t(:no_active_cards) unless @current_account.cards.any?
   end
 
   def destroy_account
@@ -300,9 +290,5 @@ class Console
   def age_input
     puts I18n.t(:enter_age)
     @age = gets.chomp.to_i
-  end
-
-  def check_card_ordinal_number(answer)
-    answer&.to_i <= @current_account.cards.length && answer&.to_i > 0
   end
 end

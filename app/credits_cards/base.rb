@@ -1,6 +1,5 @@
 module CreditCards
   class Base
-
     attr_reader :number
 
     def withdraw_tax

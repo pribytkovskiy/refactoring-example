@@ -1,3 +1,3 @@
-require './auto_load.rb'
+require './autoload.rb'
 
 Console.new.console
