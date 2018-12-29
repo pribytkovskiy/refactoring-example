@@ -21,7 +21,6 @@ en:
   choose_card: 'Choose the card for putting:'
   tax_higher: Your tax is higher than input amount
   amount_money_card: Input the amount of money you want to put on your card
-  tax_higher: Your tax is higher than input amount
   correct_amount_money: You must input correct amount of money
   choose_card_sending: 'Choose the card for sending:'
   choose_correct_card: Choose correct card
@@ -37,4 +36,3 @@ en:
   error_password_longer: Password must be longer then 6 symbols
   error_password_shorter: Password must be shorter then 30 symbols
   error_name: Your Age must be greeter then 23 and lower then 90
-  

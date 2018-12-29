@@ -31,7 +31,7 @@ class Console
   COMMANDS_MENU = { show_cards: 'SC', create_card: 'CC', destroy_card: 'DC', 
                     put_money: 'PM', withdraw_money: 'WM', send_money: 'SM', 
                     destroy_account: 'DA', exit: 'exit' }
-  COMMANDS = { create: 'create', load: 'load', exit: 'exit' }.freeze
+  COMMANDS = { create: 'create', load: 'load', exit: 'exit', yes: 'y' }.freeze
   FILE_PATH = 'accounts.yml'
 
   def initialize
@@ -70,13 +70,8 @@ class Console
       login = gets.chomp
       puts I18n.t(:enter_password)
       password = gets.chomp
-      if @account.load(login, password)
-        @current_account = @account.load(login, password)
-        break 
-      else
-        puts I18n.t(:no_account)
-        next
-      end
+      break (@current_account = @account.load(login, password)) if @account.load(login, password)
+      puts I18n.t(:no_account) unless @account.load(login, password)
     end
     main_menu
   end
@@ -105,21 +100,15 @@ class Console
   def create_card
     loop do
       puts CREATE_CARD_PHRASES
-
       type = gets.chomp
       case type
-      when CreditCard::CARD_TYPES[:usual] then return save_card(type)
-      when CreditCard::CARD_TYPES[:capitalist] then return save_card(type)
-      when CreditCard::CARD_TYPES[:virtual] then return save_card(type)
+      when CreditCard::CARD_TYPES[:usual] then return @current_account.save_card(type)
+      when CreditCard::CARD_TYPES[:capitalist] then return @current_account.save_card(type)
+      when CreditCard::CARD_TYPES[:virtual] then return @current_account.save_card(type)
       else
         puts I18n.t(:wrong_card)
       end
     end
-  end
-
-  def save_card(type)
-    @current_account.cards << CreditCard.new.create_card(type)
-    @current_account.save_change
   end
 
   def destroy_card
@@ -129,11 +118,18 @@ class Console
         print_cards
         answer = gets.chomp
         break if answer == COMMANDS[:exit] 
-        return confirmation_delete_card(answer) if answer&.to_i <= @current_account.cards.length && answer&.to_i > 0
-        puts I18n.t(:wrong_number) unless answer&.to_i <= @current_account.cards.length && answer&.to_i > 0
+        return confirmation_delete_card(answer) if check_card_ordinal_number(answer)
+        puts I18n.t(:wrong_number) unless check_card_ordinal_number(answer)
       else
         return puts I18n.t(:no_active_cards)
       end
+    end
+  end
+
+  def confirmation_delete_card(answer)
+    puts "Are you sure you want to delete #{@current_account.cards[answer&.to_i - 1].number}?[y/n]"
+    if gets.chomp == COMMANDS[:yes]
+      @current_account.destroy_card(answer)
     end
   end
 
@@ -144,8 +140,8 @@ class Console
       loop do
         answer = gets.chomp
         break if answer == COMMANDS[:exit]
-        return withdraw_money_amount_money(answer) if answer&.to_i <= @current_account.cards.length && answer&.to_i > 0
-        puts I18n.t(:wrong_number) unless answer&.to_i <= @current_account.cards.length && answer&.to_i > 0
+        return withdraw_money_amount_money(answer) if check_card_ordinal_number(answer)
+        puts I18n.t(:wrong_number) unless check_card_ordinal_number(answer)
       end
     else
       puts I18n.t(:no_active_cards)
@@ -161,7 +157,7 @@ class Console
   end
 
   def money_check_plus?(input_money)
-    input_money&.to_i > 0 ? true : false
+    input_money&.to_i > 0
   end
 
   def withdraw_money_left_money(input_money, current_card)
@@ -268,14 +264,6 @@ class Console
     puts I18n.t(:press_exit)
   end
 
-  def confirmation_delete_card(answer)
-    puts "Are you sure you want to delete #{@current_account.cards[answer&.to_i - 1].number}?[y/n]"
-    if gets.chomp == 'y'
-      @current_account.cards.delete_at(answer&.to_i - 1)
-      @current_account.save_change
-    end
-  end
-
   def show_cards
     if @current_account.cards.any?
       @current_account.cards.map { |card| puts "- #{card.number}, #{card.class.name}" }
@@ -312,5 +300,9 @@ class Console
   def age_input
     puts I18n.t(:enter_age)
     @age = gets.chomp.to_i
+  end
+
+  def check_card_ordinal_number(answer)
+    answer&.to_i <= @current_account.cards.length && answer&.to_i > 0
   end
 end

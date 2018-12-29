@@ -57,6 +57,16 @@ class Account < Validators::Account
     storing(new_accounts)
   end
 
+  def save_card(type)
+    self.cards << CreditCard.new.create_card(type)
+    save_change
+  end
+
+  def destroy_card(answer)
+    self.cards.delete_at(answer&.to_i - 1)
+    save_change
+  end
+
   private
 
   def storing(new_accounts)
