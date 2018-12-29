@@ -4,19 +4,19 @@ class Account < Validators::Account
 
   CARD_TYPES = { usual: 'usual', capitalist: 'capitalist', virtual: 'virtual' }.freeze
   CARD_LENGTH = 16
-  FILE_PATH = './db/accounts.yml'
+  FILE_PATH = './db/accounts.yml'.freeze
 
   def create(account)
     validate(account)
-    if valid?
-      @age = account.age
-      @login = account.login
-      @name = account.name
-      @password = account.password
-      @cards = []
-      new_accounts = accounts << self
-      storing(new_accounts)
-    end
+    return unless valid?
+
+    @age = account.age
+    @login = account.login
+    @name = account.name
+    @password = account.password
+    @cards = []
+    new_accounts = accounts << self
+    storing(new_accounts)
   end
 
   def load(login, password)

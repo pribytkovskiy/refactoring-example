@@ -214,25 +214,24 @@ class Console
     enter_recipient_card = gets.chomp
     loop do
       puts I18n.t(:correct_number_card) if enter_recipient_card.length != Account::CARD_LENGTH
-      break enter_recipient_card.length != Account::CARD_LENGTH
+      break if enter_recipient_card.length != Account::CARD_LENGTH
       all_cards = @current_account.accounts.map(&:cards).flatten
       recipient_cards = all_cards.select { |card| card.number == enter_recipient_card }
-      recipient_card = recipient_cards.first if recipient_cards.any?
+      return send_check_plus(sender_card, recipient_cards.first) if recipient_cards.any?
       puts "There is no card with number #{enter_recipient_card}\n" unless recipient_cards.any?
     end
-    send_check_plus(sender_card, recipient_card)
   end
 
   def send_check_plus(sender_card, recipient_card)
     loop do
       puts I18n.t(:amount_money)
       amount_money = gets.chomp
-      return send_money_send(amount_money, sender_card, recipient_card) if money_check_plus?(amount_money)
-      puts I18n.t(:wrong_number) unless money_check_plus?(amount_money)    
+      return send_money_transfer(amount_money, sender_card, recipient_card) if amount_money&.to_i > 0
+      puts I18n.t(:wrong_number) unless amount_money&.to_i > 0   
     end
   end
 
-  def send_money_send(amount_money, sender_card, recipient_card)
+  def send_money_transfer(amount_money, sender_card, recipient_card)
     sender_balance = sender_card.balance - amount_money&.to_i - sender_card.sender_tax(amount_money&.to_i)
     recipient_balance = recipient_card.balance + amount_money&.to_i - recipient_card.put_tax(amount_money&.to_i)
     case
@@ -243,9 +242,13 @@ class Console
       @current_account.save_change
       recipient_card.balance = recipient_balance
       @current_account.save_change_recipient_card(recipient_card)
+      puts "Money #{amount_money&.to_i}$ was put on #{sender_card.number}."
+      puts "Balance: #{sender_balance}$. Tax: #{sender_card.sender_tax(amount_money&.to_i)}$\n"
+      puts "Money #{amount_money&.to_i}$ was send on #{recipient_card.number}."
+      puts "Balance: #{recipient_balance}$. Tax: #{recipient_card.put_tax(amount_money&.to_i)}$\n"
+      return
     end
-    puts "Money #{amount_money&.to_i}$ was put on #{sender_card.number}. Balance: #{sender_balance}. Tax: #{sender_card.sender_tax(amount_money&.to_i)}$\n"
-    puts "Money #{amount_money&.to_i}$ was send on #{recipient_card.number}. Balance: #{recipient_balance}. Tax: #{recipient_card.put_tax(amount_money&.to_i)}$\n"
+    return
   end
 
   def check_card_ordinal_number(answer)
