@@ -1,4 +1,4 @@
-require './auto_load.rb'
+require './autoload.rb'
 
 RSpec.describe Account do
   OVERRIDABLE_FILENAME = 'spec/fixtures/account.yml'.freeze
