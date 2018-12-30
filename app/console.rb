@@ -1,4 +1,5 @@
 class Console
+  include ConsoleHelpers
   attr_reader :age, :login, :name, :password
 
   HELLO_MESSAGE = <<~HELLO_MESSAGE.freeze
@@ -17,20 +18,20 @@ class Console
   CREATE_CARD_PHRASES
 
   TEXT_MENU = <<~TEXT_MENU.freeze
-      If you want to:
-      - show all cards - press SC
-      - create card - press CC
-      - destroy card - press DC
-      - put money on card - press PM
-      - withdraw money on card - press WM
-      - send money to another card  - press SM
-      - destroy account - press `DA`
-      - exit from account - press `exit`
+    If you want to:
+    - show all cards - press SC
+    - create card - press CC
+    - destroy card - press DC
+    - put money on card - press PM
+    - withdraw money on card - press WM
+    - send money to another card  - press SM
+    - destroy account - press `DA`
+    - exit from account - press `exit`
   TEXT_MENU
 
-  COMMANDS_MENU = { show_cards: 'SC', create_card: 'CC', destroy_card: 'DC', 
-                    put_money: 'PM', withdraw_money: 'WM', send_money: 'SM', 
-                    destroy_account: 'DA', exit: 'exit' }
+  COMMANDS_MENU = { show_cards: 'SC', create_card: 'CC', destroy_card: 'DC',
+                    put_money: 'PM', withdraw_money: 'WM', send_money: 'SM',
+                    destroy_account: 'DA', exit: 'exit' }.freeze
   COMMANDS = { create: 'create', load: 'load', exit: 'exit', yes: 'y' }.freeze
 
   def initialize
@@ -57,23 +58,32 @@ class Console
       password_input
       @current_account = @account.create(self)
       break if @account.valid?
+
       @account.puts_errors
     end
     load
   end
 
   def load
+    return create_the_first_account unless @account.accounts.any?
+
+    input_login_pasword
+    main_menu
+  end
+
+  def input_login_pasword
     loop do
-      return create_the_first_account unless @account.accounts.any?
       puts I18n.t(:enter_login)
       login = gets.chomp
       puts I18n.t(:enter_password)
       password = gets.chomp
       break (@current_account = @account.load(login, password)) if @account.load(login, password)
-      puts I18n.t(:no_account) unless @account.load(login, password)
+
+      puts I18n.t(:no_account)
     end
-    main_menu
   end
+
+  # rubocop:disable Metrics/AbcSize, Metrics/CyclomaticComplexity, Metrics/MethodLength
 
   def main_menu
     loop do
@@ -88,13 +98,15 @@ class Console
       when COMMANDS_MENU[:send_money] then send_money
       when COMMANDS_MENU[:destroy_account] then return destroy_account
       when COMMANDS_MENU[:exit]
-        exit 
-        break
+        exit
+        break # rubocop:disable Lint/UnreachableCode
       else
         puts I18n.t(:wrong_command)
       end
     end
   end
+
+  # rubocop:enable Metrics/AbcSize, Metrics/CyclomaticComplexity, Metrics/MethodLength
 
   def create_card
     loop do
@@ -111,34 +123,36 @@ class Console
   end
 
   def destroy_card
+    return puts I18n.t(:no_active_cards) unless @current_account.cards.any?
+
+    input_destroy_card
+  end
+
+  def input_destroy_card
     loop do
-      if @current_account.cards.any?
-        puts I18n.t(:want_to_delete)
-        print_cards
-        answer = gets.chomp
-        break if answer == COMMANDS[:exit] 
-        return confirmation_delete_card(answer) if check_card_ordinal_number(answer)
-        puts I18n.t(:wrong_number) unless check_card_ordinal_number(answer)
-      else
-        return puts I18n.t(:no_active_cards)
-      end
+      puts I18n.t(:want_to_delete)
+      print_cards
+      answer = gets.chomp
+      break if answer == COMMANDS[:exit]
+
+      return confirmation_delete_card(answer) if check_card_ordinal_number(answer)
+
+      puts I18n.t(:wrong_number) unless check_card_ordinal_number(answer)
     end
   end
 
   def confirmation_delete_card(answer)
-    puts "Are you sure you want to delete #{@current_account.cards[answer&.to_i - 1].number}?[y/n]"
-    if gets.chomp == COMMANDS[:yes]
-      @current_account.destroy_card(answer)
-    end
+    puts "Are you sure you want to delete #{@current_account.cards[answer&.to_i.to_i - 1].number}?[y/n]"
+    return if gets.chomp != COMMANDS[:yes]
+
+    @current_account.destroy_card(answer)
   end
 
   def withdraw_money
     puts I18n.t(:choose_withdrawing)
-    loop do
-      puts I18n.t(:no_active_cards) unless @current_account.cards.any?
-      break unless @current_account.cards.any?
-      withdraw_money_amount_money(choose_card)
-    end
+    return puts I18n.t(:no_active_cards) unless @current_account.cards.any?
+
+    withdraw_money_amount_money(choose_card)
   end
 
   def choose_card
@@ -146,78 +160,79 @@ class Console
     loop do
       answer = gets.chomp
       break if answer == COMMANDS[:exit]
+
       return answer if check_card_ordinal_number(answer)
+
       puts I18n.t(:wrong_number) unless check_card_ordinal_number(answer)
     end
   end
 
-  def withdraw_money_amount_money(answer)
-    current_card = @current_account.cards[answer&.to_i - 1]
+  def withdraw_money_amount_money(answer) # rubocop:disable  Metrics/AbcSize
+    current_card = @current_account.cards[answer&.to_i.to_i - 1]
     puts I18n.t(:amount_money)
     input_money = gets.chomp
-    withdraw_money_left_money(input_money, current_card) if input_money&.to_i > 0
-    puts I18n.t(:correct_amount) unless input_money&.to_i > 0
+    return withdraw_money_left_money(input_money, current_card) if input_money&.to_i.to_i.positive?
+
+    puts I18n.t(:correct_amount)
   end
 
-  def withdraw_money_left_money(input_money, current_card)
+  def withdraw_money_left_money(input_money, current_card) # rubocop:disable  Metrics/AbcSize
     money_left = current_card.balance - input_money&.to_i - current_card.withdraw_tax(input_money&.to_i)
-    loop do
-      break puts I18n.t(:enough_money) if money_left <= 0
-      current_card.balance = money_left
-      @current_account.save_change
-      puts "Money #{input_money&.to_i}$ withdrawed from #{current_card.number}."
-      puts "Money left: #{current_card.balance}$. Tax: #{current_card.withdraw_tax(input_money&.to_i)}$"
-      return
-    end
+    return puts I18n.t(:enough_money) if money_left <= 0
+
+    current_card.balance = money_left
+    @current_account.save_change
+    puts "Money #{input_money&.to_i}$ withdrawed from #{current_card.number}."
+    puts "Money left: #{current_card.balance}$. Tax: #{current_card.withdraw_tax(input_money&.to_i)}$"
   end
 
   def put_money
     puts I18n.t(:choose_card)
-    loop do
-      puts I18n.t(:no_active_cards) unless @current_account.cards.any?
-      break unless @current_account.cards.any?
-      put_money_amount_money(choose_card)
-    end
+    return puts I18n.t(:no_active_cards) unless @current_account.cards.any?
+
+    put_money_amount_money(choose_card)
   end
 
-  def put_money_amount_money(answer)
-    current_card = @current_account.cards[answer&.to_i - 1]
+  def put_money_amount_money(answer) # rubocop:disable  Metrics/AbcSize
+    current_card = @current_account.cards[answer&.to_i.to_i - 1]
     puts I18n.t(:amount_money_card)
     amount_money = gets.chomp
-    put_money_left_money(amount_money, current_card) if amount_money&.to_i > 0
-    puts I18n.t(:correct_amount_money) unless amount_money&.to_i > 0
+    return put_money_left_money(amount_money, current_card) if amount_money&.to_i.to_i.positive?
+
+    puts I18n.t(:correct_amount_money)
   end
 
-  def put_money_left_money(amount_money, current_card)
-    loop do
-      break puts I18n.t(:tax_higher) if current_card.put_tax(amount_money&.to_i) >= amount_money&.to_i
-      current_card.balance = current_card.balance + amount_money&.to_i - current_card.put_tax(amount_money&.to_i)
-      @current_account.save_change
-      puts "Money #{amount_money&.to_i}$ was put on #{current_card.number}."
-      puts "Balance: #{current_card.balance}$. Tax: #{current_card.put_tax(amount_money&.to_i)}$"
-      return
-    end
+  def put_money_left_money(amount_money, current_card) # rubocop:disable  Metrics/AbcSize
+    return puts I18n.t(:tax_higher) if current_card.put_tax(amount_money&.to_i) >= amount_money&.to_i
+
+    current_card.balance = current_card.balance + amount_money&.to_i - current_card.put_tax(amount_money&.to_i)
+    @current_account.save_change
+    puts "Money #{amount_money&.to_i}$ was put on #{current_card.number}."
+    puts "Balance: #{current_card.balance}$. Tax: #{current_card.put_tax(amount_money&.to_i)}$"
   end
 
   def send_money
     puts I18n.t(:choose_card_sending)
-    loop do
-      puts I18n.t(:no_active_cards) unless @current_account.cards.any?
-      break unless @current_account.cards.any?
-      recipient_card(choose_card)
-    end
+    return puts I18n.t(:no_active_cards) unless @current_account.cards.any?
+
+    check_input_recipient_card(choose_card)
   end
 
-  def recipient_card(answer)
-    sender_card = @current_account.cards[answer&.to_i - 1]
+  def check_input_recipient_card(answer)
+    sender_card = @current_account.cards[answer&.to_i.to_i - 1]
     puts I18n.t(:recipient_card)
     enter_recipient_card = gets.chomp
+    return puts I18n.t(:correct_number_card) if enter_recipient_card.length != Account::CARD_LENGTH
+
+    input_recipient_card(enter_recipient_card, sender_card)
+  end
+
+  def input_recipient_card(enter_recipient_card, sender_card)
     loop do
-      puts I18n.t(:correct_number_card) if enter_recipient_card.length != Account::CARD_LENGTH
-      break if enter_recipient_card.length != Account::CARD_LENGTH
       all_cards = @current_account.accounts.map(&:cards).flatten
       recipient_cards = all_cards.select { |card| card.number == enter_recipient_card }
       return send_check_plus(sender_card, recipient_cards.first) if recipient_cards.any?
+
       puts "There is no card with number #{enter_recipient_card}\n" unless recipient_cards.any?
     end
   end
@@ -226,33 +241,38 @@ class Console
     loop do
       puts I18n.t(:amount_money)
       amount_money = gets.chomp
-      return send_money_transfer(amount_money, sender_card, recipient_card) if amount_money&.to_i > 0
-      puts I18n.t(:wrong_number) unless amount_money&.to_i > 0   
+      return send_money_transfer(amount_money, sender_card, recipient_card) if amount_money&.to_i.to_i.positive?
+
+      puts I18n.t(:wrong_number)
     end
   end
 
   def send_money_transfer(amount_money, sender_card, recipient_card)
     sender_balance = sender_card.balance - amount_money&.to_i - sender_card.sender_tax(amount_money&.to_i)
     recipient_balance = recipient_card.balance + amount_money&.to_i - recipient_card.put_tax(amount_money&.to_i)
-    case
-    when sender_balance < 0 then puts I18n.t(:enough_money)
-    when recipient_card.put_tax(amount_money&.to_i) >= amount_money&.to_i then puts I18n.t(:enough_money_sender_card)
+    if sender_balance.negative?
+      puts I18n.t(:enough_money)
+    elsif recipient_card.put_tax(amount_money&.to_i) >= amount_money&.to_i
+      puts I18n.t(:enough_money_sender_card)
     else
-      sender_card.balance = sender_balance
-      @current_account.save_change
-      recipient_card.balance = recipient_balance
-      @current_account.save_change_recipient_card(recipient_card)
-      puts "Money #{amount_money&.to_i}$ was put on #{sender_card.number}."
-      puts "Balance: #{sender_balance}$. Tax: #{sender_card.sender_tax(amount_money&.to_i)}$\n"
-      puts "Money #{amount_money&.to_i}$ was send on #{recipient_card.number}."
-      puts "Balance: #{recipient_balance}$. Tax: #{recipient_card.put_tax(amount_money&.to_i)}$\n"
-      return
+      transfer_puts(sender_balance, recipient_balance, amount_money, sender_card, recipient_card)
     end
-    return
+    return # rubocop:disable Style/RedundantReturn
+  end
+
+  def transfer_puts(sender_balance, recipient_balance, amount_money, sender_card, recipient_card)
+    sender_card.balance = sender_balance
+    @current_account.save_change
+    recipient_card.balance = recipient_balance
+    @current_account.save_change_recipient_card(recipient_card)
+    puts "Money #{amount_money&.to_i}$ was put on #{sender_card.number}."
+    puts "Balance: #{sender_balance}$. Tax: #{sender_card.sender_tax(amount_money&.to_i)}$\n"
+    puts "Money #{amount_money&.to_i}$ was send on #{recipient_card.number}."
+    puts "Balance: #{recipient_balance}$. Tax: #{recipient_card.put_tax(amount_money&.to_i)}$\n"
   end
 
   def check_card_ordinal_number(answer)
-    answer&.to_i <= @current_account.cards.length && answer&.to_i > 0
+    answer&.to_i.to_i <= @current_account.cards.length && answer&.to_i.to_i.positive?
   end
 
   def print_cards

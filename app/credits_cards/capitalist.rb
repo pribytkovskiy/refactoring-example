@@ -1,5 +1,5 @@
 module CreditCards
-  class Capitalist < Base # TODO: refactor to be equal
+  class Capitalist < Base
     attr_accessor :balance
 
     def initialize
@@ -11,7 +11,7 @@ module CreditCards
       amount * 0.04
     end
 
-    def put_tax(amount)
+    def put_tax(*)
       10
     end
 

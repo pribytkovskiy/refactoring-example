@@ -7,7 +7,7 @@ module Validators
     START_LENGTH_PASSWORD = 6
     END_LENGTH_PASSWORD = 30
     START_LENGTH_AGE = 23
-    END_LENGTH_AGE = 89
+    END_LENGTH_AGE = 90
 
     def initialize
       @errors = []
@@ -32,10 +32,10 @@ module Validators
     private
 
     def validate_name(name)
-      @errors.push(I18n.t(:error_name)) if (name == '' || name[0].upcase != name[0])
+      @errors.push(I18n.t(:error_name)) if name == '' || name[0].upcase != name[0]
     end
 
-    def validate_login(login)
+    def validate_login(login) # rubocop:disable Metrics/AbcSize
       @errors.push(I18n.t(:error_login_present)) if login.empty?
       @errors.push(I18n.t(:error_login_longer)) if login.length < START_LENGTH_NAME
       @errors.push(I18n.t(:error_login_shorter)) if login.length > END_LENGTH_NAME
@@ -53,7 +53,7 @@ module Validators
     end
 
     def accounts
-      File.exists?(FILE_PATH) ? YAML.load_file(FILE_PATH) : []
+      File.exist?(FILE_PATH) ? YAML.load_file(FILE_PATH) : []
     end
   end
 end

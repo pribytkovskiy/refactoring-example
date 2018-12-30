@@ -1,5 +1,5 @@
 module CreditCards
-  class Usual < Base # TODO: refactor to be equal
+  class Usual < Base
     attr_accessor :balance
 
     def initialize
@@ -15,7 +15,7 @@ module CreditCards
       amount * 0.2
     end
 
-    def sender_tax(amount)
+    def sender_tax(*)
       20
     end
   end
