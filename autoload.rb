@@ -1,6 +1,8 @@
 require 'yaml'
 require 'pry'
 require 'i18n'
+require './app/console/console_helpers.rb'
+require './app/console/money_helpers.rb'
 require './app/credits_cards/base.rb'
 require './app/credits_cards/capitalist.rb'
 require './app/credits_cards/usual.rb'
