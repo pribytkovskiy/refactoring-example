@@ -1,4 +1,4 @@
-module ConsoleHelpers
+class ConsoleHelpers
   HELLO_MESSAGE = <<~HELLO_MESSAGE.freeze
     Hello, we are RubyG bank!
     - If you want to create account - press `create`

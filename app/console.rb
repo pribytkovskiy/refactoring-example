@@ -1,5 +1,4 @@
-class Console
-  include ConsoleHelpers
+class Console < MoneyHelpers
   attr_reader :age, :login, :name, :password
 
   COMMANDS_MENU = { show_cards: 'SC', create_card: 'CC', destroy_card: 'DC',

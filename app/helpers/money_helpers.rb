@@ -1,4 +1,4 @@
-module ConsoleHelpers
+class MoneyHelpers < ConsoleHelpers
   def withdraw_money
     puts I18n.t(:choose_withdrawing)
     return puts I18n.t(:no_active_cards) unless @current_account.cards.any?
