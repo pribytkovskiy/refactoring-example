@@ -2,9 +2,11 @@ class Console < MoneyHelpers
   include Storage
   attr_reader :age, :login, :name, :password
 
-  COMMANDS_MENU = { show_cards: 'SC', create_card: 'CC', destroy_card: 'DC',
-                    put_money: 'PM', withdraw_money: 'WM', send_money: 'SM',
-                    destroy_account: 'DA', exit: 'exit' }.freeze
+  COMMANDS_MENU = {
+    show_cards: 'SC', create_card: 'CC', destroy_card: 'DC',
+    put_money: 'PM', withdraw_money: 'WM', send_money: 'SM',
+    destroy_account: 'DA', exit: 'exit'
+  }.freeze
   COMMANDS = { create: 'create', load: 'load', exit: 'exit', yes: 'y' }.freeze
 
   def initialize
@@ -97,7 +99,7 @@ class Console < MoneyHelpers
   end
 
   def destroy_card
-    puts I18n.t(:no_active_cards) and return unless @current_account.cards.any?
+    return puts I18n.t(:no_active_cards) unless @current_account.cards.any?
 
     input_destroy_card
   end

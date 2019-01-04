@@ -1,7 +1,7 @@
 class MoneyHelpers < ConsoleHelpers
   def withdraw_money
     puts I18n.t(:choose_withdrawing)
-    puts I18n.t(:no_active_cards) and return unless @current_account.cards.any?
+    return puts I18n.t(:no_active_cards) unless @current_account.cards.any?
 
     withdraw_money_amount_money(choose_card)
   end
@@ -27,7 +27,7 @@ class MoneyHelpers < ConsoleHelpers
 
   def put_money
     puts I18n.t(:choose_card)
-    puts I18n.t(:no_active_cards) and return unless @current_account.cards.any?
+    return puts I18n.t(:no_active_cards) unless @current_account.cards.any?
 
     put_money_amount_money(choose_card)
   end

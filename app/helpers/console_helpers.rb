@@ -70,7 +70,7 @@ class ConsoleHelpers
 
   def destroy_account
     puts I18n.t(:destroy_account)
-    @current_account.destroy if gets.chomp == 'y'
+    @current_account.destroy if gets.chomp == Console::COMMANDS[:yes]
   end
 
   def create_the_first_account
