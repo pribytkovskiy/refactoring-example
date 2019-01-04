@@ -1,5 +1,6 @@
 module Validators
   class Account
+    include Storage
     attr_reader :errors
 
     START_LENGTH_NAME = 4
@@ -50,10 +51,6 @@ module Validators
 
     def validate_age(age)
       @errors.push(I18n.t(:error_name)) unless age.between?(START_LENGTH_AGE, END_LENGTH_AGE)
-    end
-
-    def accounts
-      File.exist?(FILE_PATH) ? YAML.load_file(FILE_PATH) : []
     end
   end
 end

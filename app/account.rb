@@ -1,10 +1,10 @@
 class Account < Validators::Account
+  include Storage
   attr_accessor :cards
   attr_reader :age, :login, :name, :password
 
   CARD_TYPES = { usual: 'usual', capitalist: 'capitalist', virtual: 'virtual' }.freeze
   CARD_LENGTH = 16
-  FILE_PATH = './db/accounts.yml'.freeze
 
   def create(account)
     validate(account)
@@ -35,10 +35,6 @@ class Account < Validators::Account
     storing(new_accounts)
   end
 
-  def accounts
-    File.exist?(FILE_PATH) ? YAML.load_file(FILE_PATH) : []
-  end
-
   def save_change
     new_accounts = []
     accounts.each { |ac| ac.login == login ? new_accounts.push(self) : new_accounts.push(ac) }
@@ -57,7 +53,7 @@ class Account < Validators::Account
   end
 
   def save_card(type)
-    cards << CreditCard.new.create_card(type)
+    cards << create_card(type)
     save_change
   end
 
@@ -67,10 +63,6 @@ class Account < Validators::Account
   end
 
   private
-
-  def storing(new_accounts)
-    File.open(FILE_PATH, 'w') { |f| f.write new_accounts.to_yaml }
-  end
 
   def create_card(type)
     case type

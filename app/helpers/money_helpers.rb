@@ -1,7 +1,7 @@
 class MoneyHelpers < ConsoleHelpers
   def withdraw_money
     puts I18n.t(:choose_withdrawing)
-    return puts I18n.t(:no_active_cards) unless @current_account.cards.any?
+    puts I18n.t(:no_active_cards) and return unless @current_account.cards.any?
 
     withdraw_money_amount_money(choose_card)
   end
@@ -17,7 +17,7 @@ class MoneyHelpers < ConsoleHelpers
 
   def withdraw_money_left_money(input_money, current_card) # rubocop:disable  Metrics/AbcSize
     money_left = current_card.balance - input_money&.to_i - current_card.withdraw_tax(input_money&.to_i)
-    return puts I18n.t(:enough_money) if money_left <= 0
+    puts I18n.t(:enough_money) and return if money_left <= 0
 
     current_card.balance = money_left
     @current_account.save_change
@@ -27,7 +27,7 @@ class MoneyHelpers < ConsoleHelpers
 
   def put_money
     puts I18n.t(:choose_card)
-    return puts I18n.t(:no_active_cards) unless @current_account.cards.any?
+    puts I18n.t(:no_active_cards) and return unless @current_account.cards.any?
 
     put_money_amount_money(choose_card)
   end
@@ -42,7 +42,7 @@ class MoneyHelpers < ConsoleHelpers
   end
 
   def put_money_left_money(amount_money, current_card) # rubocop:disable  Metrics/AbcSize
-    return puts I18n.t(:tax_higher) if current_card.put_tax(amount_money&.to_i) >= amount_money&.to_i
+    puts I18n.t(:tax_higher) and return if current_card.put_tax(amount_money&.to_i) >= amount_money&.to_i
 
     current_card.balance = current_card.balance + amount_money&.to_i - current_card.put_tax(amount_money&.to_i)
     @current_account.save_change
@@ -52,7 +52,7 @@ class MoneyHelpers < ConsoleHelpers
 
   def send_money
     puts I18n.t(:choose_card_sending)
-    return puts I18n.t(:no_active_cards) unless @current_account.cards.any?
+    puts I18n.t(:no_active_cards) and return unless @current_account.cards.any?
 
     check_input_recipient_card(choose_card)
   end
@@ -61,7 +61,7 @@ class MoneyHelpers < ConsoleHelpers
     sender_card = @current_account.cards[answer&.to_i.to_i - 1]
     puts I18n.t(:recipient_card)
     enter_recipient_card = gets.chomp
-    return puts I18n.t(:correct_number_card) if enter_recipient_card.length != Account::CARD_LENGTH
+    puts I18n.t(:correct_number_card) and return if enter_recipient_card.length != Account::CARD_LENGTH
 
     input_recipient_card(enter_recipient_card, sender_card)
   end

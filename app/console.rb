@@ -1,4 +1,5 @@
 class Console < MoneyHelpers
+  include Storage
   attr_reader :age, :login, :name, :password
 
   COMMANDS_MENU = { show_cards: 'SC', create_card: 'CC', destroy_card: 'DC',
@@ -28,16 +29,17 @@ class Console < MoneyHelpers
       age_input
       login_input
       password_input
-      @current_account = @account.create(self)
+      @account.create(self) if @account.valid?
+      @current_account = @account.load(@login, @password) if @account.valid?
       break if @account.valid?
 
       @account.puts_errors
     end
-    load
+    main_menu
   end
 
   def load
-    return create_the_first_account unless @account.accounts.any?
+    return create_the_first_account unless accounts.any?
 
     input_login_pasword
     main_menu
@@ -85,9 +87,9 @@ class Console < MoneyHelpers
       puts CREATE_CARD_PHRASES
       type = gets.chomp
       case type
-      when CreditCard::CARD_TYPES[:usual] then return @current_account.save_card(type)
-      when CreditCard::CARD_TYPES[:capitalist] then return @current_account.save_card(type)
-      when CreditCard::CARD_TYPES[:virtual] then return @current_account.save_card(type)
+      when CreditCards::CARD_TYPES[:usual] then return @current_account.save_card(type)
+      when CreditCards::CARD_TYPES[:capitalist] then return @current_account.save_card(type)
+      when CreditCards::CARD_TYPES[:virtual] then return @current_account.save_card(type)
       else
         puts I18n.t(:wrong_card)
       end
@@ -95,7 +97,7 @@ class Console < MoneyHelpers
   end
 
   def destroy_card
-    return puts I18n.t(:no_active_cards) unless @current_account.cards.any?
+    puts I18n.t(:no_active_cards) and return unless @current_account.cards.any?
 
     input_destroy_card
   end

@@ -7,15 +7,23 @@ module CreditCards
       @number = generate_card_number
     end
 
-    def withdraw_tax(amount)
-      amount * 0.05
+    def percent_withdraw_tax
+      5
     end
 
-    def put_tax(amount)
-      amount * 0.2
+    def percent_put_tax
+      20
     end
 
-    def sender_tax(*)
+    def percent_sender_tax
+      0
+    end
+
+    def fixed_put_tax
+      0
+    end
+
+    def fixed_sender_tax
       20
     end
   end

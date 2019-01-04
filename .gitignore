@@ -4,3 +4,4 @@ spec/fixtures/account.yml
 coverage
 .DS_Store
 db/accounts.yml
+.rspec_status
