@@ -23,7 +23,7 @@ class Account < Validators::Account
 
   def load(login, password)
     if accounts.map { |a| { login: a.login, password: a.password } }.include?({ login: login, password: password })
-      accounts.select { |a| login == a.login }.first
+      accounts.detect { |a| login == a.login }
     end
   end
 

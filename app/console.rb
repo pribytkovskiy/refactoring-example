@@ -31,12 +31,12 @@ class Console < MoneyHelpers
       age_input
       login_input
       password_input
-      @account.create(self) if @account.valid?
-      @current_account = @account.load(@login, @password) if @account.valid?
+      @account.create(self)
       break if @account.valid?
 
       @account.puts_errors
     end
+    @current_account = @account.load(login, password)
     main_menu
   end
 

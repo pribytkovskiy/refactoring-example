@@ -35,4 +35,5 @@ en:
   error_password_present: Password must present
   error_password_longer: Password must be longer then 6 symbols
   error_password_shorter: Password must be shorter then 30 symbols
-  error_name: Your Age must be greeter then 23 and lower then 90
+  error_age: Your Age must be greeter then 23 and lower then 90
+  error_name: Your name must not be empty and starts with first upcase letter

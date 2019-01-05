@@ -16,7 +16,7 @@ module Validators
 
     def validate(account)
       validate_name(account.name)
-      validate_age(account.age)
+      validate_age(account.age.to_i)
       validate_login(account.login)
       validate_password(account.password)
     end
@@ -46,11 +46,11 @@ module Validators
     def validate_password(password)
       @errors.push(I18n.t(:error_password_present)) if password.empty?
       @errors.push(I18n.t(:error_password_longer)) if password.length < START_LENGTH_PASSWORD
-      @errors.push(I18n.t(:error_password_shorter)) if password.length > START_LENGTH_PASSWORD
+      @errors.push(I18n.t(:error_password_shorter)) if password.length > END_LENGTH_PASSWORD
     end
 
     def validate_age(age)
-      @errors.push(I18n.t(:error_name)) unless age.between?(START_LENGTH_AGE, END_LENGTH_AGE)
+      @errors.push(I18n.t(:error_age)) unless age.between?(START_LENGTH_AGE, END_LENGTH_AGE)
     end
   end
 end

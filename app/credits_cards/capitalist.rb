@@ -3,7 +3,7 @@ module CreditCards
     attr_accessor :balance
 
     def initialize
-      @balance = 50.0
+      @balance = 100.0
       @number = generate_card_number
     end
 
