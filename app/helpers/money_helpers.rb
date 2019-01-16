@@ -110,7 +110,7 @@ class MoneyHelpers < ConsoleHelpers
     sender_card.balance = sender_balance
     @current_account.save_change
     recipient_card.balance = recipient_balance
-    @current_account.save_change_recipient_card(recipient_card)
+    @current_account.save_change
     puts "Money #{amount_money&.to_i}$ was put on #{sender_card.number}."
     puts "Balance: #{sender_balance}$. Tax: #{sender_card.sender_tax(amount_money&.to_i)}$\n"
     puts "Money #{amount_money&.to_i}$ was send on #{recipient_card.number}."

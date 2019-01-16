@@ -8,6 +8,17 @@ class Console < MoneyHelpers
     destroy_account: 'DA', exit: 'exit'
   }.freeze
   COMMANDS = { create: 'create', load: 'load', exit: 'exit', yes: 'y' }.freeze
+  MENU = {
+    COMMANDS_MENU[:show_cards] => ->(instance) { instance.show_cards },
+    COMMANDS_MENU[:create_card] => ->(instance) { instance.create_card },
+    COMMANDS_MENU[:destroy_card] => ->(instance) { instance.destroy_card },
+    COMMANDS_MENU[:put_money] => ->(instance) { instance.put_money },
+    COMMANDS_MENU[:withdraw_money] => ->(instance) { instance.withdraw_money },
+    COMMANDS_MENU[:send_money] => ->(instance) { instance.send_money },
+    COMMANDS_MENU[:destroy_account] => ->(instance) { return instance.destroy_account },
+    COMMANDS_MENU[:exit] => ->(_instance) { return exit }
+
+  }.freeze
 
   def initialize
     @account = Account.new
@@ -63,16 +74,9 @@ class Console < MoneyHelpers
     loop do
       puts "\nWelcome, #{@current_account.name}"
       puts TEXT_MENU
-      case gets.chomp
-      when COMMANDS_MENU[:show_cards] then show_cards
-      when COMMANDS_MENU[:create_card] then create_card
-      when COMMANDS_MENU[:destroy_card] then destroy_card
-      when COMMANDS_MENU[:put_money] then put_money
-      when COMMANDS_MENU[:withdraw_money] then withdraw_money
-      when COMMANDS_MENU[:send_money] then send_money
-      when COMMANDS_MENU[:destroy_account] then return destroy_account
-      when COMMANDS_MENU[:exit] then return exit
-      else
+      begin
+        MENU.fetch(gets.chomp).call(self)
+      rescue KeyError => e
         puts I18n.t(:wrong_command)
       end
     end

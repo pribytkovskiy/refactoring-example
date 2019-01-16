@@ -15,35 +15,21 @@ class Account < Validators::Account
     @name = account.name
     @password = account.password
     @cards = []
-    new_accounts = accounts << self
-    storing(new_accounts)
+    array_accounts << self
+    save_change
   end
 
   def load(login, password)
-    accounts.detect { |account| login == account.login } unless chek_account(login, password)
+    array_accounts.detect { |account| login == account.login } unless chek_account(login, password)
   end
 
   def destroy
-    new_accounts = []
-    accounts.select { |ac| new_accounts.push(ac) unless ac.login == login }
-    storing(new_accounts)
+    array_accounts.delete(self)
+    save_change
   end
 
   def save_change
-    new_accounts = []
-    accounts.map { |ac| ac.login == login ? new_accounts.push(self) : new_accounts.push(ac) }
-    storing(new_accounts)
-  end
-
-  def save_change_recipient_card(recipient_card)
-    new_accounts = []
-    accounts.map do |ac|
-      new_accounts.push(ac) unless ac.cards.map(&:number).include? recipient_card.number
-      next unless ac.cards.map(&:number).include? recipient_card.number
-
-      new_accounts.push(recipienr_cadr(recipient_card, ac))
-    end
-    storing(new_accounts)
+    storing(@@accounts)
   end
 
   def save_card(type)
@@ -66,18 +52,11 @@ class Account < Validators::Account
     end
   end
 
-  def recipienr_cadr(recipient_card, account)
-    recipient = account
-    new_recipient_cards = []
-    recipient.cards.each do |card|
-      card.balance = recipient_card.balance if card.number == recipient_card.number
-      new_recipient_cards.push(card)
-    end
-    recipient.cards = new_recipient_cards
-    recipient
+  def chek_account(login, password)
+    array_accounts.select { |account| account.login == login && account.password == password }.empty?
   end
 
-  def chek_account(login, password)
-    accounts.select { |account| account.login == login && account.password == password }.empty?
+  def array_accounts
+    @@accounts ||= accounts
   end
 end

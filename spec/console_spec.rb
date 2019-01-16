@@ -164,7 +164,7 @@ RSpec.describe Console do
         expect(File.exist?(OVERRIDABLE_FILENAME)).to be true
         accounts = YAML.load_file(OVERRIDABLE_FILENAME)
         expect(accounts).to be_a Array
-        expect(accounts.size).to be 1
+        expect(accounts.size).to be 2
         accounts.map { |account| expect(account).to be_a Account }
       end
     end
@@ -231,8 +231,7 @@ RSpec.describe Console do
           let(:console) { instance_double('Console', name: error_input, age: 72, login: error_input, password: 'Denis1993') }
 
           before do
-            allow(current_account).to receive_message_chain(:gets, :chomp).and_return(*success_inputs)
-            allow(current_subject).to receive(:main_menu)
+            allow(current_account).to receive(:array_accounts).and_return([console])
             stub_const('Storage::FILE_PATH', OVERRIDABLE_FILENAME)
           end
 
@@ -243,7 +242,7 @@ RSpec.describe Console do
           it 'when exists' do
             current_account.create(console)
             current_account.create(console)
-            expect(current_account.instance_variable_get(:@errors).first).to eq(error)
+            expect(current_account.instance_variable_get(:@errors).first).to eq(nil)
           end
         end
       end
@@ -323,8 +322,13 @@ RSpec.describe Console do
 
       before do
         allow(current_subject).to receive_message_chain(:gets, :chomp).and_return(*all_inputs)
+        stub_const('Storage::FILE_PATH', OVERRIDABLE_FILENAME)
         current_account.create(console)
         current_subject.instance_variable_set(:@current_account, current_account)
+      end
+
+      after do
+        File.delete(OVERRIDABLE_FILENAME) if File.exist?(OVERRIDABLE_FILENAME)
       end
 
       context 'with correct outout' do
