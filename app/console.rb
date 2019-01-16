@@ -1,6 +1,6 @@
 class Console < MoneyHelpers
   include Storage
-  attr_reader :age, :login, :name, :password
+  attr_reader :age, :login, :name, :password, :current_card
 
   COMMANDS_MENU = {
     show_cards: 'SC', create_card: 'CC', destroy_card: 'DC',
@@ -59,8 +59,6 @@ class Console < MoneyHelpers
     end
   end
 
-  # rubocop:disable Metrics/AbcSize, Metrics/CyclomaticComplexity, Metrics/MethodLength
-
   def main_menu
     loop do
       puts "\nWelcome, #{@current_account.name}"
@@ -73,16 +71,12 @@ class Console < MoneyHelpers
       when COMMANDS_MENU[:withdraw_money] then withdraw_money
       when COMMANDS_MENU[:send_money] then send_money
       when COMMANDS_MENU[:destroy_account] then return destroy_account
-      when COMMANDS_MENU[:exit]
-        exit
-        break # rubocop:disable Lint/UnreachableCode
+      when COMMANDS_MENU[:exit] then return exit
       else
         puts I18n.t(:wrong_command)
       end
     end
   end
-
-  # rubocop:enable Metrics/AbcSize, Metrics/CyclomaticComplexity, Metrics/MethodLength
 
   def create_card
     loop do

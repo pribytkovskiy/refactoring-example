@@ -771,7 +771,6 @@ RSpec.describe Console do
                 expect(card_usual.balance).to eq(custom_card[:new_balance])
                 expect(File.exist?(OVERRIDABLE_FILENAME)).to be true
                 file_accounts = YAML.load_file(OVERRIDABLE_FILENAME)
-
               end
             end
           end

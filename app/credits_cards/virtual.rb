@@ -2,29 +2,15 @@ module CreditCards
   class Virtual < Base
     attr_accessor :balance
 
+    PERCENT_WITHDRAW_TAX = 88
+    PERCENT_PUT_TAX = 0
+    PERCENT_SENDER_TAX = 0
+    FIXED_PUT_TAX = 1
+    FIXED_SENDER_TAX = 1
+
     def initialize
       @balance = 150.0
       @number = generate_card_number
-    end
-
-    def percent_withdraw_tax
-      88
-    end
-
-    def percent_put_tax
-      0
-    end
-
-    def percent_sender_tax
-      0
-    end
-
-    def fixed_put_tax
-      1
-    end
-
-    def fixed_sender_tax
-      1
     end
   end
 end

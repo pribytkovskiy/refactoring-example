@@ -6,8 +6,8 @@ class MoneyHelpers < ConsoleHelpers
     withdraw_money_amount_money(choose_card)
   end
 
-  def withdraw_money_amount_money(answer) # rubocop:disable  Metrics/AbcSize
-    current_card = @current_account.cards[answer&.to_i.to_i - 1]
+  def withdraw_money_amount_money(answer)
+    current_card_set(answer)
     puts I18n.t(:amount_money)
     input_money = gets.chomp
     return withdraw_money_left_money(input_money, current_card) if input_money&.to_i.to_i.positive?
@@ -15,14 +15,17 @@ class MoneyHelpers < ConsoleHelpers
     puts I18n.t(:correct_amount)
   end
 
-  def withdraw_money_left_money(input_money, current_card) # rubocop:disable  Metrics/AbcSize
+  def current_card_set(answer)
+    @current_card = @current_account.cards[answer&.to_i.to_i - 1]
+  end
+
+  def withdraw_money_left_money(input_money)
     money_left = current_card.balance - input_money&.to_i - current_card.withdraw_tax(input_money&.to_i)
     puts I18n.t(:enough_money) && return if money_left <= 0
 
-    current_card.balance = money_left
+    @current_card.balance = money_left
     @current_account.save_change
-    puts "Money #{input_money&.to_i}$ withdrawed from #{current_card.number}."
-    puts "Money left: #{current_card.balance}$. Tax: #{current_card.withdraw_tax(input_money&.to_i)}$"
+    puts_money_withdraw(input_money)
   end
 
   def put_money
@@ -32,21 +35,26 @@ class MoneyHelpers < ConsoleHelpers
     put_money_amount_money(choose_card)
   end
 
-  def put_money_amount_money(answer) # rubocop:disable  Metrics/AbcSize
-    current_card = @current_account.cards[answer&.to_i.to_i - 1]
+  def put_money_amount_money(answer)
+    current_card_set(answer)
     puts I18n.t(:amount_money_card)
     amount_money = gets.chomp
-    return put_money_left_money(amount_money, current_card) if amount_money&.to_i.to_i.positive?
+    return put_money_left_money(amount_money) if amount_money&.to_i.to_i.positive?
 
     puts I18n.t(:correct_amount_money)
   end
 
-  def put_money_left_money(amount_money, current_card) # rubocop:disable  Metrics/AbcSize
+  def put_money_left_money(amount_money)
     return puts I18n.t(:tax_higher) if current_card.put_tax(amount_money&.to_i) >= amount_money&.to_i
 
-    current_card.balance = current_card.balance + amount_money&.to_i - current_card.put_tax(amount_money&.to_i)
+    @current_card.balance = current_card.balance + amount_money&.to_i - current_card.put_tax(amount_money&.to_i)
     @current_account.save_change
-    puts "Money #{amount_money&.to_i}$ was put on #{current_card.number}. Balance: #{current_card.balance}$. Tax: #{current_card.put_tax(amount_money&.to_i)}$"
+    puts_money_put(amount_money)
+  end
+
+  def puts_money_put(amount_money)
+    puts "Money #{amount_money&.to_i}$ was put on #{current_card.number}. Balance: #{current_card.balance}$.
+    Tax: #{current_card.put_tax(amount_money&.to_i)}$"
   end
 
   def send_money

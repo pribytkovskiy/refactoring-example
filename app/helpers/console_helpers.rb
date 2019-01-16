@@ -97,4 +97,9 @@ class ConsoleHelpers
     puts I18n.t(:enter_age)
     @age = gets.chomp.to_i
   end
+
+  def puts_money_withdraw(input_money)
+    puts "Money #{input_money&.to_i}$ withdrawed from #{current_card.number}."
+    puts "Money left: #{current_card.balance}$. Tax: #{current_card.withdraw_tax(input_money&.to_i)}$"
+  end
 end

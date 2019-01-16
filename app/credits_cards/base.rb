@@ -4,36 +4,22 @@ module CreditCards
   class Base
     attr_reader :number
 
+    PERCENT_WITHDRAW_TAX = 0
+    PERCENT_PUT_TAX = 0
+    PERCENT_SENDER_TAX = 0
+    FIXED_PUT_TAX = 0
+    FIXED_SENDER_TAX = 0
+
     def withdraw_tax(amount = 0)
-      amount * percent_withdraw_tax / 100.0
+      amount * PERCENT_WITHDRAW_TAX / 100.0
     end
 
     def put_tax(amount = 0)
-      amount * percent_put_tax / 100.0 + fixed_put_tax
+      amount * PERCENT_PUT_TAX / 100.0 + FIXED_PUT_TAX
     end
 
     def sender_tax(amount = 0)
-      amount * percent_sender_tax / 100.0 + fixed_sender_tax
-    end
-
-    def percent_withdraw_tax
-      raise NotImplementedError
-    end
-
-    def percent_put_tax
-      raise NotImplementedError
-    end
-
-    def percent_sender_tax
-      raise NotImplementedError
-    end
-
-    def fixed_put_tax
-      raise NotImplementedError
-    end
-
-    def fixed_sender_tax
-      raise NotImplementedError
+      amount * PERCENT_SENDER_TAX / 100.0 + FIXED_SENDER_TAX
     end
 
     private
