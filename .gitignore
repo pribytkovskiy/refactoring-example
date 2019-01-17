@@ -1,5 +1,6 @@
-.history
-accounts.yml
+db/accounts.yml
 spec/fixtures/account.yml
 coverage
+.history
 .DS_Store
+.rspec_status

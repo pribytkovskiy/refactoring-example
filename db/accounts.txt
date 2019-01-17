@@ -1,0 +1,21 @@
+---
+- !ruby/object:Account
+  errors: []
+  age: 25
+  login: Johnny
+  name: Dima
+  password: johnny1
+  cards: []
+- !ruby/object:Account
+  errors: []
+  age: 25
+  login: papa
+  name: Papa
+  password: qwerty
+  cards:
+  - !ruby/object:CreditCards::Usual
+    balance: 90.0
+    number: '3497229400176408'
+  - !ruby/object:CreditCards::Usual
+    balance: 130.0
+    number: '7528378450035730'
