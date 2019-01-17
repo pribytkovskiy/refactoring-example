@@ -10,7 +10,7 @@ class MoneyHelpers < ConsoleHelpers
     current_card_set(answer)
     puts I18n.t(:amount_money)
     input_money = gets.chomp
-    return withdraw_money_left_money(input_money, current_card) if input_money&.to_i.to_i.positive?
+    return withdraw_money_left_money(input_money) if input_money&.to_i.to_i.positive?
 
     puts I18n.t(:correct_amount)
   end
@@ -75,7 +75,7 @@ class MoneyHelpers < ConsoleHelpers
 
   def input_recipient_card(enter_recipient_card, sender_card)
     loop do
-      all_cards = @current_account.accounts.map(&:cards).flatten
+      all_cards = @current_account.array_accounts.map(&:cards).flatten
       recipient_cards = all_cards.select { |card| card.number == enter_recipient_card }
       return send_check_plus(sender_card, recipient_cards.first) if recipient_cards.any?
 

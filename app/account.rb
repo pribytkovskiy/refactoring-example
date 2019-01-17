@@ -3,7 +3,6 @@ class Account < Validators::Account
   attr_accessor :cards
   attr_reader :age, :login, :name, :password
 
-  CARD_TYPES = { usual: 'usual', capitalist: 'capitalist', virtual: 'virtual' }.freeze
   CARD_LENGTH = 16
 
   def create(account)
@@ -33,7 +32,7 @@ class Account < Validators::Account
   end
 
   def save_card(type)
-    cards << create_card(type)
+    cards << CreditCard.new(type)
     save_change
   end
 
@@ -42,21 +41,13 @@ class Account < Validators::Account
     save_change
   end
 
-  private
-
-  def create_card(type)
-    case type
-    when CARD_TYPES[:usual] then CreditCards::Usual.new
-    when CARD_TYPES[:capitalist] then CreditCards::Capitalist.new
-    when CARD_TYPES[:virtual] then CreditCards::Virtual.new
-    end
+  def array_accounts
+    @@accounts ||= accounts
   end
+
+  private
 
   def chek_account(login, password)
     array_accounts.select { |account| account.login == login && account.password == password }.empty?
-  end
-
-  def array_accounts
-    @@accounts ||= accounts
   end
 end

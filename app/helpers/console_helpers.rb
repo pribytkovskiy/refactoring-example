@@ -59,12 +59,12 @@ class ConsoleHelpers
   end
 
   def print_cards
-    @current_account.cards.each_with_index { |c, i| puts "- #{c.number}, #{c.class.name}, press #{i + 1}" }
+    @current_account.cards.each_with_index { |card, i| puts "- #{card.number}, #{card.type}, press #{i + 1}" }
     puts I18n.t(:press_exit)
   end
 
   def show_cards
-    @current_account.cards.map { |card| puts "- #{card.number}, #{card.class.name}" } if @current_account.cards.any?
+    @current_account.cards.map { |card| puts "- #{card.number}, #{card.type}" } if @current_account.cards.any?
     puts I18n.t(:no_active_cards) unless @current_account.cards.any?
   end
 

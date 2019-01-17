@@ -34,6 +34,24 @@ class Console < MoneyHelpers
     end
   end
 
+  def create_card
+    loop do
+      puts CREATE_CARD_PHRASES
+      input_as_key = gets.chomp.to_sym
+      if CreditCard::CARD.key?(input_as_key)
+        return @current_account.save_card(input_as_key)
+      end
+
+      puts I18n.t(:wrong_card)
+    end
+  end
+
+  def destroy_card
+    return puts I18n.t(:no_active_cards) unless @current_account.cards.any?
+
+    input_destroy_card
+  end
+
   private
 
   def create
@@ -80,25 +98,5 @@ class Console < MoneyHelpers
         puts I18n.t(:wrong_command)
       end
     end
-  end
-
-  def create_card
-    loop do
-      puts CREATE_CARD_PHRASES
-      type = gets.chomp
-      case type
-      when CreditCards::CARD_TYPES[:usual] then return @current_account.save_card(type)
-      when CreditCards::CARD_TYPES[:capitalist] then return @current_account.save_card(type)
-      when CreditCards::CARD_TYPES[:virtual] then return @current_account.save_card(type)
-      else
-        puts I18n.t(:wrong_card)
-      end
-    end
-  end
-
-  def destroy_card
-    return puts I18n.t(:no_active_cards) unless @current_account.cards.any?
-
-    input_destroy_card
   end
 end
